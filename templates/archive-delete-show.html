@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head class="h-100 m-0 p-0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Hydrus Archive/Delete</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="/static/jquery-3.3.1.min.js"></script>
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body style="background: #19191b" class="h-100 p-0 m-0 d-flex">
+    <div class="d-flex flex-column absolute h-100 w-100">
+        <nav style="flex: none" class="navbar navbar-expand-md navbar-dark bg-dark">
+            <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Archive/Delete</a>
+        </nav>
+        {% if image %}
+        <main style="flex:auto; overflow-y: hidden;" class="mx-auto justify-content-center align-self-center">
+            <img class="img-responsive mh-100 mw-100" src="{{ image }}">
+        </main>
+        <p class="mb-0 text-center w-auto d-block float-right font-weight-bold text-white bg-dark">{{ current_id }}/{{ total_ids }}</p>
+        <footer style="flex: none" class="page-footer bg-dark">
+            <form class="mt-3 d-flex form-group">
+                <a target="_blank" id="a-d-button" class="btn btn-success flex-fill py-3 mx-1" value="archive">Archive</a>
+                <a target="_blank" id="a-d-button" class="btn btn-success flex-fill py-3 mx-1" value="skip">Skip</a>
+                <a target="_blank" id="a-d-button" class="btn btn-success flex-fill py-3 mx-1" value="delete">Delete</a>
+            </form>
+        </footer>
+    </div>
+    {% endif %}
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
