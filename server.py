@@ -20,7 +20,8 @@ def add_tags(api_key, api_url, hash, tag):
     cl = hydrus.Client(api_key, api_url)
     cl.add_tags([hash], None, {service:{1:["hydrus-archive-delete:archive"]}})
     cl.add_tags([hash], None, {service:{1:["hydrus-archive-delete:delete"]}})
-    cl.add_tags([hash], {service: [tag]})
+    if tag:
+        cl.add_tags([hash], {service: [tag]})
 
 def save_session(api_key, api_url, service):
     session['api_key'] = api_key
@@ -87,6 +88,9 @@ def ads(id):
                 add_tags(api_key, api_url, hash, "hydrus-archive-delete:archive")
             elif request.form.get('action') == 'delete':
                 add_tags(api_key, api_url, hash, "hydrus-archive-delete:delete")
+            elif request.form.get('action') == 'skip':
+                add_tags(api_key, api_url, hash, None)
+
         return render_template('archive-delete-show.html', image = image, nid = nid, current_id = intid, total_ids = total_ids)
     except IndexError:
         return redirect(url_for('index'))
