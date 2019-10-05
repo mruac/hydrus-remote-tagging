@@ -1,6 +1,10 @@
 # Hydrus Archive/Delete  
 A web based archive/delete filter for Hydrus  
 
+# Dependencies  
+hydrus-api  
+flask  
+
 # How to use
 Just run `$ python server.py`  
 
