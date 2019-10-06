@@ -11,7 +11,7 @@ Just run `$ python server.py`
 **You also might want to change the app.secret_key in the server.py file**
 
 ## Keybinds  
-A - Archive 
+A - Archive  
 S - Skip  
 D - Delete  
 Z - Go back to previous page  
