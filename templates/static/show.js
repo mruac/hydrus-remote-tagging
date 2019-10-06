@@ -60,7 +60,8 @@ $(function() {
             }
 
         },
-        threshold: 100,
+        threshold: 50,
+        cancelThreshold:20,
         triggerOnTouchEnd: true
     });
 });

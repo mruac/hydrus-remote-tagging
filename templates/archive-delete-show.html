@@ -27,7 +27,7 @@
             <button type="button" class="btn btn-primary float-right ml-auto" data-toggle="modal" data-target="#infoModal">Info</button>
         </nav>
         {% if image %}
-        <main class="overflow-hidden m-auto mx-auto justify-content-center align-self-center">
+        <main class="text-center overflow-hidden m-auto mx-auto justify-content-center align-self-center">
             {% if mime.startswith('image') %}
             <img class="img-responsive mh-100 mw-100" src="{{ image }}">
             {% elif mime.startswith('video') %}
