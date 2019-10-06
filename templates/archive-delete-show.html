@@ -9,6 +9,7 @@
     <script src="/static/jquery-3.3.1.min.js"></script>
     <script src="/static/popper.min.js"></script>
     <script src="/static/bootstrap.min.js"></script>
+    <script src="/static/jquery.touchSwipe.min.js"></script>
     <style type="text/css">
     html,
     body {
@@ -20,13 +21,13 @@
 </head>
 
 <body style="background: #19191b" class="h-100 p-0 m-0 d-flex">
-    <div class="d-flex flex-column absolute h-100 w-100">
-        <nav style="flex: none" class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="d-flex flex-column absolute h-100 w-100 overflow-hidden">
+        <nav style="flex: none; z-index: 10" class="navbar navbar-expand-md navbar-dark bg-dark">
             <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Archive/Delete</a>
             <button type="button" class="btn btn-primary float-right ml-auto" data-toggle="modal" data-target="#infoModal">Info</button>
         </nav>
         {% if image %}
-        <main style="flex:auto; overflow-y: hidden;" class="mx-auto justify-content-center align-self-center">
+        <main class="overflow-hidden m-auto mx-auto justify-content-center align-self-center">
             {% if mime.startswith('image') %}
             <img class="img-responsive mh-100 mw-100" src="{{ image }}">
             {% elif mime.startswith('video') %}
@@ -36,8 +37,8 @@
             <h1 class="mx-auto text-white nm-text" style="align-self: center;">Not an image or video file. Skipping.</h1>
             {% endif %}
         </main>
-        <p class="mb-0 text-center w-auto d-block float-right font-weight-bold text-white bg-dark">{{ current_id }}/{{ total_ids }}</p>
-        <footer style="flex: none" class="page-footer bg-dark">
+        <p style="z-index: 10" class="mb-0 text-center w-auto d-block float-right font-weight-bold text-white bg-dark">{{ current_id }}/{{ total_ids }}</p>
+        <footer style="flex: none; z-index: 10" class="page-footer bg-dark">
             <form class="mt-3 d-flex form-group">
                 <a target="_blank" id="a-d-button" class="btn btn-success flex-fill py-3 mx-1" value="archive">Archive</a>
                 <a target="_blank" id="a-d-button" class="btn btn-success flex-fill py-3 mx-1" value="skip">Skip</a>
