@@ -1,28 +1,40 @@
 <!DOCTYPE html>
 <html>
+
 <head class="h-100 m-0 p-0">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Hydrus Archive/Delete</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
     <script src="/static/jquery-3.3.1.min.js"></script>
+    <script src="/static/popper.min.js"></script>
+    <script src="/static/bootstrap.min.js"></script>
     <style type="text/css">
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
     </style>
 </head>
+
 <body style="background: #19191b" class="h-100 p-0 m-0 d-flex">
     <div class="d-flex flex-column absolute h-100 w-100">
         <nav style="flex: none" class="navbar navbar-expand-md navbar-dark bg-dark">
             <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Archive/Delete</a>
+            <button type="button" class="btn btn-primary float-right ml-auto" data-toggle="modal" data-target="#infoModal">Info</button>
         </nav>
         {% if image %}
         <main style="flex:auto; overflow-y: hidden;" class="mx-auto justify-content-center align-self-center">
+            {% if mime.startswith('image') %}
             <img class="img-responsive mh-100 mw-100" src="{{ image }}">
+            {% elif mime.startswith('video') %}
+            <video controls autoplay loop muted class="mh-100 mw-100">
+                <source src="{{ image }}" type="{{ mime }}"></video>
+            {% else %}
+            <h1 class="mx-auto text-white nm-text" style="align-self: center;">Not an image or video file. Skipping.</h1>
+            {% endif %}
         </main>
         <p class="mb-0 text-center w-auto d-block float-right font-weight-bold text-white bg-dark">{{ current_id }}/{{ total_ids }}</p>
         <footer style="flex: none" class="page-footer bg-dark">
@@ -34,7 +46,47 @@
         </footer>
     </div>
     {% endif %}
-    <script src="/static/script.js"></script>
+    <div class="modal bd-modal-xl fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content bg-dark text-light" style="word-wrap: break-word;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Info</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span class="text-light" aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <div class="bg-dark text-light border-light pb-0 list-group-item list-group-item-action flex-column align-items-start">
+                            <h5 class="mb-1 font-weight-bold">Hash</h5>
+                            <p>{{ meta['hash'] }}</p>
+                        </div>
+                        <div class="bg-dark text-light border-light pb-0 list-group-item list-group-item-action flex-column align-items-start">
+                            <h5 class="mb-1 font-weight-bold">Mime</h5>
+                            <p>{{ meta['mime'] }}</p>
+                        </div>
+                        <div class="bg-dark text-light border-light pb-0 list-group-item list-group-item-action flex-column align-items-start">
+                            <h5 class="mb-1 font-weight-bold">Size</h5>
+                            <p>{{ filesize }}</p>
+                        </div>
+                        <div class="bg-dark text-light border-light pb-0 list-group-item list-group-item-action flex-column align-items-start">
+                            <h5 class="mb-1 font-weight-bold">Dimentions</h5>
+                            <p>{{ meta['width'] }}px / {{ meta['height'] }}px</p>
+                        </div>
+                        <div class="bg-dark text-light border-light pb-0 list-group-item list-group-item-action flex-column align-items-start">
+                            <h5 class="mb-1 font-weight-bold">Known Urls</h5>
+                            <p>{{ known_urls }}</p>
+                        </div>
+                        <div class="bg-dark text-light border-light pb-0 list-group-item list-group-item-action flex-column align-items-start">
+                            <h5 class="mb-1 font-weight-bold">Tags</h5>
+                            <p>{{ tags }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/show.js"></script>
 </body>
 
 </html>

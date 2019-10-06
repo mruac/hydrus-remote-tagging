@@ -4,20 +4,43 @@
 <head>
     <meta charset="utf-8">
     <title>Hydrus Archive/Delete</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <script src="/static/jquery-3.3.1.min.js"></script>
+    <script src="/static/popper.min.js"></script>
+    <script src="/static/bootstrap.min.js"></script>
 </head>
+
 <body style="background: #19191b">
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-3">
         <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Archive/Delete</a>
+        <button type="button" class="btn btn-primary float-right ml-auto" data-toggle="modal" data-target="#infoModal">Settings</button>
     </nav>
     <form action="{{ url_for('ad') }}" method="post">
-        <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" value="{{ session['api_url'] }}" name="api_url" placeholder="API URL">
-        <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="password" value="{{ session['api_key'] }}" name="api_key" placeholder="API Key">
+        <input id="api-url-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" value="{{ session['api_url'] }}" name="api_url" placeholder="API URL">
+        <input id="api-key-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="password" value="{{ session['api_key'] }}" name="api_key" placeholder="API Key">
         <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="tags" placeholder="Search Tags (underscores for spaces, spaces as seperator)">
-        <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" value="{{ session['service'] }}" name="service" placeholder="Tag Service">
+        <input id="tag-service-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" value="{{ session['service'] }}" name="service" placeholder="Tag Service">
         <button class="btn btn-success" style="margin: 10px" type="submit">Search</button>
     </form>
+    <div class="modal bd-modal-xl fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bg-dark text-light" style="word-wrap: break-word;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span class="text-light" aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input id="settings-api-url-input" class="form-control w-100 mx-auto" style="width: 50%; margin: 10px" type="text" name="api_url" placeholder="Default API URL">
+                    <input id="settings-api-key-input" class="form-control w-100 mx-auto" style="width: 50%; margin: 10px" type="password" name="api_key" placeholder="Default API Key">
+                    <input id="settings-tag-service-input" class="form-control w-100 mx-auto" style="width: 50%; margin: 10px" type="text" name="service" placeholder="Default Tag Service">
+                    <button id="settings-save-btn" class="btn btn-primary" style="margin: 10px">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/index.js"></script>
 </body>
 
 </html>

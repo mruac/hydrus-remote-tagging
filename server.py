@@ -47,6 +47,13 @@ def get_fids_from_sql():
         fids = cur.fetchone();
     return fids
 
+def sizeof_fmt(num, suffix='B'):
+    for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
+
 @app.route('/archive-delete', methods=['GET', 'POST'])
 def ad():
     if request.method == 'GET':
@@ -82,8 +89,14 @@ def ads(id):
         nid = str(int(id) + 1)
         total_ids = len(fids)
         image = api_url+"/get_files/file?file_id="+str(iid)+"&Hydrus-Client-API-Access-Key="+api_key
+        metadata = json.loads(json.dumps(cl.file_metadata(file_ids=[iid])[0]))
+        hash = metadata['hash']
+        mime = metadata['mime']
+        filesize = sizeof_fmt(metadata['size'])
+        known_urls = ', '.join(metadata['known_urls'])
+        tags = ', '.join(metadata['service_names_to_statuses_to_tags']['all known tags']['0'])
+        print(known_urls)
         if request.method == 'POST':
-            hash = cl.file_metadata(file_ids=[iid],only_identifiers=True)[0]["hash"]
             if request.form.get('action') == 'archive':
                 add_tags(api_key, api_url, hash, "hydrus-archive-delete:archive")
             elif request.form.get('action') == 'delete':
@@ -91,7 +104,7 @@ def ads(id):
             elif request.form.get('action') == 'skip':
                 add_tags(api_key, api_url, hash, None)
 
-        return render_template('archive-delete-show.html', image = image, nid = nid, current_id = intid, total_ids = total_ids)
+        return render_template('archive-delete-show.html', image = image, nid = nid, current_id = intid, total_ids = total_ids, mime =  mime, meta = metadata, filesize = filesize, known_urls = known_urls, tags = tags)
     except IndexError:
         return redirect(url_for('index'))
 
