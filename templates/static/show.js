@@ -10,58 +10,62 @@ if ($('h1').hasClass('nm-text')) {
             window.location = next
         });
     });
-    $(document).keydown(function(e) {
-        switch (e.which) {
-            case 65: // a
-                $.post(current, { action: "archive" }, function() {
+    if ((localStorage.getItem('keybinds') == "true") || (localStorage.getItem('keybinds') == null)) {
+        $(document).keydown(function(e) {
+            switch (e.which) {
+                case 65: // a
+                    $.post(current, { action: "archive" }, function() {
+                        window.location = next
+                    });
+                    break;
+
+                case 68: // d
+                    $.post(current, { action: "delete" }, function() {
+                        window.location = next
+                    });
+                    break;
+
+                case 83: // s
                     window.location = next
-                });
-                break;
+                    break;
 
-            case 68: // d
-                $.post(current, { action: "delete" }, function() {
+                case 90: // z
+                    window.location = prev
+                    break;
+
+                default:
+                    return;
+            }
+            e.preventDefault();
+        });
+    }
+}
+if ((localStorage.getItem('swiping') == "true") || (localStorage.getItem('swiping') == null)) {
+    $(function() {
+        //Enable swiping...
+        $("main").swipe({
+            //Generic swipe handler for all directions
+            swipe: function(event, direction, distance, duration) {
+                $(this).css("transition-duration", (duration / 1000).toFixed(1) + "s");
+                if (direction == 'right') {
+                    $(this).css("transform", "translate(50%,0)");
+                    $.post(current, { action: "archive" }, function() {
+                        window.location = next
+                    });
+                } else if (direction == 'left') {
+                    $(this).css("transform", "translate(-50%,0)");
+                    $.post(current, { action: "delete" }, function() {
+                        window.location = next
+                    });
+                } else if (direction == 'up') {
                     window.location = next
-                });
-                break;
+                    $(this).css("transform", "translate(0,-50%)");
+                }
 
-            case 83: // s
-                window.location = next
-                break;
-
-            case 90: // z
-                window.location = prev
-                break;
-
-            default:
-                return;
-        }
-        e.preventDefault();
+            },
+            threshold: 50,
+            cancelThreshold: 20,
+            triggerOnTouchEnd: true
+        });
     });
 }
-$(function() {
-    //Enable swiping...
-    $("main").swipe({
-        //Generic swipe handler for all directions
-        swipe: function(event, direction, distance, duration) {
-            $(this).css("transition-duration", (duration / 1000).toFixed(1) + "s");
-            if (direction == 'right') {
-                $(this).css("transform", "translate(50%,0)");
-                $.post(current, { action: "archive" }, function() {
-                    window.location = next
-                });
-            } else if (direction == 'left') {
-                $(this).css("transform", "translate(-50%,0)");
-                $.post(current, { action: "delete" }, function() {
-                    window.location = next
-                });
-            } else if (direction == 'up') {
-                window.location = next
-                $(this).css("transform", "translate(0,-50%)");
-            }
-
-        },
-        threshold: 50,
-        cancelThreshold:20,
-        triggerOnTouchEnd: true
-    });
-});

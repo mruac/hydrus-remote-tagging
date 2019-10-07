@@ -13,10 +13,26 @@ if ((localStorage.getItem('tag-service') != null) && (localStorage.getItem('tag-
 document.getElementById('settings-api-url-input').value = localStorage.getItem('api-url')
 document.getElementById('settings-api-key-input').value = localStorage.getItem('api-key')
 document.getElementById('settings-tag-service-input').value = localStorage.getItem('tag-service')
-
+if ((localStorage.getItem('keybinds') == "true") || (localStorage.getItem('keybinds') == null)) {
+	$("#settings-keybind-checkbox").prop('checked', true)
+} else {
+	$("#settings-keybind-checkbox").prop('checked', false)
+}
+if ((localStorage.getItem('swiping') == "true") || (localStorage.getItem('swiping') == null)) {
+	$("#settings-swiping-checkbox").prop('checked', true)
+} else {
+	$("#settings-swiping-checkbox").prop('checked', false)
+}
 $('#settings-save-btn').click(function() {
     localStorage.setItem("api-url", apiUrl.value);
     localStorage.setItem("api-key", apiKey.value);
     localStorage.setItem("tag-service", tagService.value);
-    console.log("saved")
+    localStorage.setItem("keybinds", $("#settings-keybind-checkbox").prop('checked'));
+    localStorage.setItem("swiping", $("#settings-keybind-checkbox").prop('checked'));
+    $('#settings-save-btn').text('Saved');
+    $('#settings-save-btn').addClass('btn-success');
+    setTimeout(function() {
+	    $('#settings-save-btn').text('Save');
+	    $('#settings-save-btn').removeClass('btn-success');
+	  }, 2000); 
 });
