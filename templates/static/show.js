@@ -47,26 +47,26 @@ if ((localStorage.getItem('swiping') == "true") || (localStorage.getItem('swipin
                 if (direction == 'right') {
                     $(this).css("transform", "translate("+distance+"px,0)");
                     console.log(distance)
-                    if (distance >= 250) {
+                    if (distance >= 150) {
 	                    $.post(current, { action: "archive" }, function() {
 	                        window.location = next
 	                    });
                 	}
                 } else if (direction == 'left') {
                     $(this).css("transform", "translate(-"+distance+"px,0)");
-                    if (distance >= 250) {
+                    if (distance >= 150) {
 	                    $.post(current, { action: "delete" }, function() {
 	                        window.location = next
 	                    });
                 	}
                 } else if (direction == 'up') {
                     $(this).css("transform", "translate(0,-"+distance+"px)");
-                    if (distance >= 250) {
+                    if (distance >= 150) {
                     	window.location = next
                     }
                 }
             },
-            threshold: 250,
+            threshold: 150,
             cancelThreshold: 20,
             triggerOnTouchEnd: true
         });
