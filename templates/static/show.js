@@ -42,28 +42,31 @@ if ($('h1').hasClass('nm-text')) {
 }
 if ((localStorage.getItem('swiping') == "true") || (localStorage.getItem('swiping') == null)) {
     $(function() {
-        //Enable swiping...
         $("main").swipe({
-            //Generic swipe handler for all directions
-            swipe: function(event, direction, distance, duration) {
-                $(this).css("transition-duration", (duration / 1000).toFixed(1) + "s");
+            swipeStatus: function(event, phase, direction, distance, duration) {
                 if (direction == 'right') {
-                    $(this).css("transform", "translate(50%,0)");
-                    $.post(current, { action: "archive" }, function() {
-                        window.location = next
-                    });
+                    $(this).css("transform", "translate("+distance+"px,0)");
+                    console.log(distance)
+                    if (distance >= 250) {
+	                    $.post(current, { action: "archive" }, function() {
+	                        window.location = next
+	                    });
+                	}
                 } else if (direction == 'left') {
-                    $(this).css("transform", "translate(-50%,0)");
-                    $.post(current, { action: "delete" }, function() {
-                        window.location = next
-                    });
+                    $(this).css("transform", "translate(-"+distance+"px,0)");
+                    if (distance >= 250) {
+	                    $.post(current, { action: "delete" }, function() {
+	                        window.location = next
+	                    });
+                	}
                 } else if (direction == 'up') {
-                    window.location = next
-                    $(this).css("transform", "translate(0,-50%)");
+                    $(this).css("transform", "translate(0,-"+distance+"px)");
+                    if (distance >= 250) {
+                    	window.location = next
+                    }
                 }
-
             },
-            threshold: 50,
+            threshold: 250,
             cancelThreshold: 20,
             triggerOnTouchEnd: true
         });
