@@ -46,7 +46,6 @@ if ((localStorage.getItem('swiping') == "true") || (localStorage.getItem('swipin
             swipeStatus: function(event, phase, direction, distance, duration) {
                 if (direction == 'right') {
                     $(this).css("transform", "translate("+distance+"px,0)");
-                    console.log(distance)
                     if (distance >= 150) {
 	                    $.post(current, { action: "archive" }, function() {
 	                        window.location = next
