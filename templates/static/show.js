@@ -1,6 +1,7 @@
 var current = location.href.split('/')[4].replace(/\?.*$/, '');
 var next = parseInt(current) + 1
 var prev = parseInt(current) - 1
+var thres = 150
 if ($('h1').hasClass('nm-text')) {
     window.location = next
 } else {
@@ -46,28 +47,45 @@ if ((localStorage.getItem('swiping') == "true") || (localStorage.getItem('swipin
             swipeStatus: function(event, phase, direction, distance, duration) {
                 if (direction == 'right') {
                     $(this).css("transform", "translate("+distance+"px,0)");
-                    if (distance >= 150) {
-	                    $.post(current, { action: "archive" }, function() {
-	                        window.location = next
-	                    });
+                    if (distance >= thres) {
+                            $('body').css("background", "#20ffc9")
+                        if (phase == "end") {
+    	                    $.post(current, { action: "archive" }, function() {
+    	                        window.location = next
+    	                    });
+                        }
                 	}
                 } else if (direction == 'left') {
                     $(this).css("transform", "translate(-"+distance+"px,0)");
-                    if (distance >= 150) {
-	                    $.post(current, { action: "delete" }, function() {
-	                        window.location = next
-	                    });
+                    if (distance >= thres) {
+                        $('body').css("background", "#ff2056")
+                        if (phase == "end") {
+    	                    $.post(current, { action: "delete" }, function() {
+    	                        window.location = next
+    	                    });
+                        }
                 	}
                 } else if (direction == 'up') {
                     $(this).css("transform", "translate(0,-"+distance+"px)");
-                    if (distance >= 150) {
-                    	window.location = next
+                    if (distance >= thres) {
+                        $('body').css("background", "#20c6ff")
+                        if (phase == "end") {
+                    	   window.location = next
+                        }
                     }
                 }
+                if ((phase == "cancel") && (distance < thres)) {
+                    $(this).css("transform", "translate(0,0)");
+                }
+                if ((distance < thres) && ($('body').css("backgroundColor") != "rgb(25, 25, 27)")) {
+                    $('body').css("backgroundColor", "#19191b")
+                }
             },
-            threshold: 150,
+            fingers: 1,
+            threshold: thres,
             cancelThreshold: 20,
-            triggerOnTouchEnd: true
+            allowPageScroll: true
         });
     });
 }
+$("")
