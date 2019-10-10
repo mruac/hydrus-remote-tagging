@@ -28,7 +28,7 @@ $('#settings-save-btn').click(function() {
     localStorage.setItem("api-key", apiKey.value);
     localStorage.setItem("tag-service", tagService.value);
     localStorage.setItem("keybinds", $("#settings-keybind-checkbox").prop('checked'));
-    localStorage.setItem("swiping", $("#settings-keybind-checkbox").prop('checked'));
+    localStorage.setItem("swiping", $("#settings-swiping-checkbox").prop('checked'));
     $('#settings-save-btn').text('Saved');
     $('#settings-save-btn').addClass('btn-success');
     setTimeout(function() {
