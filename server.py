@@ -80,8 +80,11 @@ def ad():
 def ads(id):
     try:
         api_key = session['api_key']
-        api_url = session['api_url']
-        cl = hydrus.Client(api_key)
+        if session['api_url'].endswith('/'):
+            api_url = session['api_url'][:-1]
+        else:
+            api_url = session['api_url']
+        cl = hydrus.Client(api_key, api_url)
         fids = get_fids_from_sql()
         fids = list(fids)[0].split(',')
         intid = int(id)
