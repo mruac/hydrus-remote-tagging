@@ -98,7 +98,6 @@ def ads(id):
         filesize = sizeof_fmt(metadata['size'])
         known_urls = ', '.join(metadata['known_urls'])
         tags = ', '.join(metadata['service_names_to_statuses_to_tags']['all known tags']['0'])
-        print(known_urls)
         if request.method == 'POST':
             if request.form.get('action') == 'archive':
                 add_tags(api_key, api_url, hash, "hydrus-archive-delete:archive")
