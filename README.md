@@ -30,11 +30,11 @@ Swipe up to skip
 
 ## Todo  
 * Preload images  
-   * Advanced Options  
-	* Custom threshold  
-	* Change Keybindings  
-	* Hide buttons  
-	* Ignore PTR tags in Info
-	* Low tag/known URL's warning  
+* Advanced Options  
+  * Custom threshold  
+  * Change Keybindings  
+  * Hide buttons  
+  * Ignore PTR tags in Info
+  * Low tag/known URL's warning  
 * Namespace colors and tag sorting  
 * Better exception handling  
