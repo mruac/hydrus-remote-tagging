@@ -5,6 +5,7 @@ import json
 import os
 import secrets
 import sqlite3 as sql
+import requests
 
 app = Flask(__name__)
 app._static_folder = os.path.abspath("templates/static/")
@@ -15,13 +16,12 @@ def search_files(api_key, api_url, search_tags):
     fids = cl.search_files(search_tags, True)
     return fids
 
-def add_tags(api_key, api_url, hash, tag):
-    service = session['service']
-    cl = hydrus.Client(api_key, api_url)
-    cl.add_tags([hash], None, {service:{1:["hydrus-archive-delete:archive"]}})
-    cl.add_tags([hash], None, {service:{1:["hydrus-archive-delete:delete"]}})
-    if tag:
-        cl.add_tags([hash], {service: [tag]})
+def archive_file(api_key, api_url, hash):
+    requests.post(api_url+"/add_files/undelete_files", headers={"Hydrus-Client-API-Access-Key":api_key}, json={"hash": hash}) # undelete file first if in trash
+    requests.post(api_url+"/add_files/archive_files", headers={"Hydrus-Client-API-Access-Key": api_key}, json={"hash": hash})
+
+def delete_file(api_key, api_url, hash):
+    requests.post(api_url+"/add_files/delete_files", headers={"Hydrus-Client-API-Access-Key":api_key}, json={"hash": hash})
 
 def save_session(api_key, api_url, service):
     session['api_key'] = api_key
@@ -36,7 +36,7 @@ def save_sql(fids):
     fids = ','.join(str(e) for e in fids)
     with sql.connect("session.db") as con:
         cur = con.cursor()
-        cur.execute("REPLACE INTO session (session_id, file_ids) VALUES (?,?)",(str(session_id), str(fids)) )
+        cur.execute("REPLACE INTO session (session_id, file_ids) VALUES (?,?)",(str(session_id), str(fids)))
         con.commit()
 
 def get_fids_from_sql():
@@ -97,14 +97,12 @@ def ads(id):
         mime = metadata['mime']
         filesize = sizeof_fmt(metadata['size'])
         known_urls = ', '.join(metadata['known_urls'])
-        tags = ', '.join(metadata['service_names_to_statuses_to_tags']['all known tags']['0'])
+        tags = ', '.join(sorted(metadata['service_names_to_statuses_to_tags']['all known tags']['0']))
         if request.method == 'POST':
             if request.form.get('action') == 'archive':
-                add_tags(api_key, api_url, hash, "hydrus-archive-delete:archive")
+                archive_file(api_key, api_url, hash)
             elif request.form.get('action') == 'delete':
-                add_tags(api_key, api_url, hash, "hydrus-archive-delete:delete")
-            elif request.form.get('action') == 'skip':
-                add_tags(api_key, api_url, hash, None)
+                delete_file(api_key, api_url, hash)
 
         return render_template('archive-delete-show.html', image = image, nid = nid, current_id = intid, total_ids = total_ids, mime =  mime, meta = metadata, filesize = filesize, known_urls = known_urls, tags = tags)
     except IndexError:

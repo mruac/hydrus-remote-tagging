@@ -20,7 +20,7 @@
     </style>
 </head>
 
-<body style="background: #19191b" class="h-100 p-0 m-0 d-flex">
+<body style="background: #19191b" class="h-100 p-0 m-0 d-flex overflow-hidden">
     <div class="d-flex flex-column absolute h-100 w-100 overflow-hidden">
         <nav style="flex: none; z-index: 10" class="navbar navbar-expand-md navbar-dark bg-dark">
             <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Archive/Delete</a>
@@ -37,7 +37,7 @@
             <h1 class="mx-auto text-white nm-text" style="align-self: center;">Not an image or video file. Skipping.</h1>
             {% endif %}
         </main>
-        <p style="z-index: 10" class="mb-0 text-center w-auto d-block float-right font-weight-bold text-white bg-dark">{{ current_id }}/{{ total_ids }}</p>
+        <div style="z-index: 10" class="mb-0 text-center w-auto d-block float-right font-weight-bold text-white bg-dark"><p class="d-inline">{{ current_id }}/{{ total_ids }}</p></div>
         <footer style="flex: none; z-index: 10" class="page-footer bg-dark">
             <form class="mt-3 d-flex form-group">
                 <a target="_blank" id="a-d-button" class="btn btn-success flex-fill py-3 mx-1" value="archive">Archive</a>

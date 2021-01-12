@@ -1,9 +1,6 @@
 # Hydrus Archive/Delete  
 A web based archive/delete filter for Hydrus  
 
-**Note: This program does not actually archive or delete any files from hydrus, it only *marks* them with either a
-“hydrus-archive-delete:archive” or “hydrus-archive-delete:delete” tag. You will still have to use a client to delete or archive files with these tags**
-
 # Dependencies  
 hydrus-api  
 flask  
@@ -34,7 +31,7 @@ Swipe up to skip
   * Custom threshold  
   * Change Keybindings  
   * Hide buttons  
-  * Ignore PTR tags in Info
   * Low tag/known URL's warning  
 * Namespace colors and tag sorting  
 * Better exception handling  
+* Seperate tag services in Info  

@@ -16,9 +16,8 @@
         <button type="button" class="btn btn-primary float-right ml-auto" data-toggle="modal" data-target="#infoModal">Settings</button>
     </nav>
     <form action="{{ url_for('ad') }}" method="post">
-        <input id="api-url-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" value="{{ session['api_url'] }}" name="api_url" placeholder="API URL">
-        <input id="api-key-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="password" value="{{ session['api_key'] }}" name="api_key" placeholder="API Key">
-        <input id="tag-service-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" value="{{ session['service'] }}" name="service" placeholder="Tag Service">
+        <input id="api-url-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" value="{{ session['api_url'] }}" name="api_url" placeholder="API URL" required>
+        <input id="api-key-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="password" value="{{ session['api_key'] }}" name="api_key" placeholder="API Key" required>
         <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="tags" placeholder="Search Tags (underscores for spaces, spaces as seperator)">
         <button class="btn btn-success" style="margin: 10px" type="submit">Search</button>
     </form>
@@ -34,7 +33,6 @@
                 <div class="modal-body" id="settings-modal">
                     <input id="settings-api-url-input" class="form-control w-100 mx-auto" style="width: 50%; margin: 10px" type="text" name="api_url" placeholder="Default API URL">
                     <input id="settings-api-key-input" class="form-control w-100 mx-auto" style="width: 50%; margin: 10px" type="password" name="api_key" placeholder="Default API Key">
-                    <input id="settings-tag-service-input" class="form-control w-100 mx-auto" style="width: 50%; margin: 10px" type="text" name="service" placeholder="Default Tag Service">
                     <div class="custom-control custom-checkbox">
                         <input id="settings-keybind-checkbox" type="checkbox" class="custom-control-input" checked>
                         <label class="custom-control-label" for="settings-keybind-checkbox">Enable Keybinds</label>
