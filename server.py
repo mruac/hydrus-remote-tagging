@@ -56,25 +56,30 @@ def sizeof_fmt(num, suffix='B'):
 
 @app.route('/archive-delete', methods=['GET', 'POST'])
 def ad():
-    if request.method == 'GET':
-        return redirect(url_for('index'))
     try:
-        session['session_id']
-    except KeyError:
-        generate_session_id()
-    save_session(request.form.get('api_key'), request.form.get('api_url'), request.form.get('service'))
-    api_key = session['api_key']
-    api_url = session['api_url']
-    post_tags = request.form.get('tags')
-    session_id = session['session_id']
-    tags = post_tags.split()
-    clean_tags = ["-hydrus-archive-delete:archive","-hydrus-archive-delete:delete"]
-    for tag in tags:
-        clean_tags.append(tag.replace('_',' '))
-    fids = search_files(api_key, api_url, clean_tags)
-    total_ids = len(fids)
-    save_sql(fids)
-    return render_template('archive-delete.html', ids = total_ids, tags = post_tags)
+        if request.method == 'GET':
+            return redirect(url_for('index'))
+        try:
+            session['session_id']
+        except KeyError:
+            generate_session_id()
+        save_session(request.form.get('api_key'), request.form.get('api_url'), request.form.get('service'))
+        api_key = session['api_key']
+        api_url = session['api_url']
+        post_tags = request.form.get('tags')
+        session_id = session['session_id']
+        tags = post_tags.split()
+        clean_tags = []
+        for tag in tags:
+            clean_tags.append(tag.replace('_',' '))
+        fids = search_files(api_key, api_url, clean_tags)
+        total_ids = len(fids)
+        save_sql(fids)
+        return render_template('archive-delete.html', ids = total_ids, tags = post_tags)
+    except hydrus.InsufficientAccess:
+        return render_template('index.html', error="Insufficient access to Hydrus API")
+    except hydrus.ServerError:
+        return render_template('index.html', error="Hydrus API encountered a server error")
 
 @app.route('/archive-delete/<id>', methods=['GET', 'POST'])
 def ads(id):
@@ -91,20 +96,24 @@ def ads(id):
         iid = int(fids[intid-1])
         nid = str(int(id) + 1)
         total_ids = len(fids)
-        image = api_url+"/get_files/file?file_id="+str(iid)+"&Hydrus-Client-API-Access-Key="+api_key
+        image = api_url+"/get_files/file?file_id="+str(int(fids[intid]))+"&Hydrus-Client-API-Access-Key="+api_key
+        next_images = [api_url+"/get_files/file?file_id="+str(int(fids[intid+1]))+"&Hydrus-Client-API-Access-Key="+api_key,api_url+"/get_files/file?file_id="+str(int(fids[intid+2]))+"&Hydrus-Client-API-Access-Key="+api_key,api_url+"/get_files/file?file_id="+str(int(fids[intid+3]))+"&Hydrus-Client-API-Access-Key="+api_key,api_url+"/get_files/file?file_id="+str(int(fids[intid+4]))+"&Hydrus-Client-API-Access-Key="+api_key]
         metadata = json.loads(json.dumps(cl.file_metadata(file_ids=[iid])[0]))
         hash = metadata['hash']
         mime = metadata['mime']
         filesize = sizeof_fmt(metadata['size'])
-        known_urls = ', '.join(metadata['known_urls'])
-        tags = ', '.join(sorted(metadata['service_names_to_statuses_to_tags']['all known tags']['0']))
+        known_urls = metadata['known_urls']
+        tags = metadata['service_names_to_statuses_to_tags']
+        tags.pop('all known tags')
+        tags = { x.translate({32:"_"}) : y  
+                 for x, y in tags.items()}
         if request.method == 'POST':
             if request.form.get('action') == 'archive':
                 archive_file(api_key, api_url, hash)
             elif request.form.get('action') == 'delete':
                 delete_file(api_key, api_url, hash)
 
-        return render_template('archive-delete-show.html', image = image, nid = nid, current_id = intid, total_ids = total_ids, mime =  mime, meta = metadata, filesize = filesize, known_urls = known_urls, tags = tags)
+        return render_template('archive-delete-show.html', image = image, next_images = next_images, nid = nid, current_id = intid, total_ids = total_ids, mime =  mime, meta = metadata, filesize = filesize, known_urls = known_urls, tags = tags)
     except IndexError:
         return redirect(url_for('index'))
 

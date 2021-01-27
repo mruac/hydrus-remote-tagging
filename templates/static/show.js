@@ -2,6 +2,7 @@ var current = location.href.split('/')[4].replace(/\?.*$/, '');
 var next = parseInt(current) + 1
 var prev = parseInt(current) - 1
 var thres = 150
+// Keybinds
 if ($('h1').hasClass('nm-text')) {
     window.location = next
 } else {
@@ -41,6 +42,7 @@ if ($('h1').hasClass('nm-text')) {
         });
     }
 }
+// Swiping
 if ((localStorage.getItem('swiping') == "true") || (localStorage.getItem('swiping') == null)) {
     $(function() {
         $("main").swipe({
@@ -88,4 +90,3 @@ if ((localStorage.getItem('swiping') == "true") || (localStorage.getItem('swipin
         });
     });
 }
-$("")

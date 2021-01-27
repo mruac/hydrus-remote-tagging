@@ -26,12 +26,11 @@ Swipe left to delete
 Swipe up to skip  
 
 ## Todo  
-* Preload images  
+* Better preloading images(?) 
 * Advanced Options  
   * Custom threshold  
   * Change Keybindings  
   * Hide buttons  
   * Low tag/known URL's warning  
 * Namespace colors and tag sorting  
-* Better exception handling  
-* Seperate tag services in Info  
+* Better exception handling   
