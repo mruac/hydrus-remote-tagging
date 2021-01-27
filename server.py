@@ -93,7 +93,7 @@ def ads(id):
         fids = get_fids_from_sql()
         fids = list(fids)[0].split(',')
         intid = int(id)
-        iid = int(fids[intid-1])
+        iid = int(fids[intid])
         nid = str(int(id) + 1)
         total_ids = len(fids)
         image = api_url+"/get_files/file?file_id="+str(int(fids[intid]))+"&Hydrus-Client-API-Access-Key="+api_key

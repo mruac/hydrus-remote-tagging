@@ -18,7 +18,7 @@ if ((localStorage.getItem('swiping') == "true") || (localStorage.getItem('swipin
 } else {
 	$("#settings-swiping-checkbox").prop('checked', false)
 }
-$('#settings-save-btn').click(function() {
+$('#settings-save-btn').on('click', function() {
     localStorage.setItem("api-url", apiUrl.value);
     localStorage.setItem("api-key", apiKey.value);
     localStorage.setItem("keybinds", $("#settings-keybind-checkbox").prop('checked'));
