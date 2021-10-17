@@ -1,33 +1,43 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
-    <title>Hydrus Archive/Delete</title>
+    <title>Hydrus Remote Tagging</title>
     <link rel="stylesheet" href="/static/bootstrap.min.css">
     <script src="/static/jquery-3.3.1.min.js"></script>
     <script src="/static/bootstrap.min.js"></script>
+    <script src="/static/index.js"></script>
 </head>
 
 <body style="background: #19191b">
     {% if error %}
-    <div class = "alert alert-warning">
-    <a href = "#" class = "close" data-dismiss = "alert">
-        &times;
-    </a>
-    <strong>Warning!</strong> {{ error }}
+    <div class="alert alert-warning">
+        <a href="#" class="close" data-dismiss="alert">
+            &times;
+        </a>
+        <strong>Warning!</strong> {{ error }}
     </div>
     {% endif %}
+
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-3">
-        <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Archive/Delete</a>
-        <button type="button" class="btn btn-primary float-right ml-auto" data-toggle="modal" data-target="#infoModal">Settings</button>
+        <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Remote Tagging</a>
+        <button type="button" class="btn btn-primary float-end ml-auto" data-toggle="modal"
+            data-target="#infoModal">Settings</button>
     </nav>
+
     <form action="{{ url_for('ad') }}" method="post">
-        <input id="api-url-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" value="{{ session['api_url'] }}" name="api_url" placeholder="API URL" required>
-        <input id="api-key-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="password" value="{{ session['api_key'] }}" name="api_key" placeholder="API Key" required>
-        <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="tags" placeholder="Search Tags (underscores for spaces, spaces as seperator)">
+        <input id="api-url-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text"
+            value="{{ session['api_url'] }}" name="api_url" placeholder="API URL" required>
+        <input id="api-key-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="password"
+            value="{{ session['api_key'] }}" name="api_key" placeholder="API Key" required>
+        <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="tags"
+            placeholder="Search Tags (underscores for spaces, spaces as seperator)">
         <button class="btn btn-success" style="margin: 10px" type="submit">Search</button>
     </form>
-    <div class="modal bd-modal-xl fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+
+    <div class="modal bd-modal-xl fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content bg-dark text-light" style="word-wrap: break-word;">
                 <div class="modal-header">
@@ -37,21 +47,15 @@
                     </button>
                 </div>
                 <div class="modal-body" id="settings-modal">
-                    <input id="settings-api-url-input" class="form-control w-100 mx-auto" style="width: 50%; margin: 10px" type="text" name="api_url" placeholder="Default API URL">
-                    <input id="settings-api-key-input" class="form-control w-100 mx-auto" style="width: 50%; margin: 10px" type="password" name="api_key" placeholder="Default API Key">
-                    <div class="custom-control custom-checkbox">
-                        <input id="settings-keybind-checkbox" type="checkbox" class="custom-control-input" checked>
-                        <label class="custom-control-label" for="settings-keybind-checkbox">Enable Keybinds</label>
-                    </div>
-                    <div class="custom-control custom-checkbox">
-                        <input id="settings-swiping-checkbox" type="checkbox" class="custom-control-input" checked>
-                        <label class="custom-control-label" for="settings-swiping-checkbox">Enable Swiping</label>
-                    </div>
+                    <input id="settings-api-url-input" class="form-control w-100 mx-auto"
+                        style="width: 50%; margin: 10px" type="text" name="api_url" placeholder="Default API URL">
+                    <input id="settings-api-key-input" class="form-control w-100 mx-auto"
+                        style="width: 50%; margin: 10px" type="password" name="api_key" placeholder="Default API Key">
                     <button id="settings-save-btn" class="btn btn-primary" style="margin: 10px">Save</button>
                 </div>
             </div>
         </div>
     </div>
-    <script src="/static/index.js"></script>
 </body>
+
 </html>

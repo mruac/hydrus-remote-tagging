@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Tag Search Results</title>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+
+</head>
+
+<body style="background: #19191b">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-3">
+        <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Remote Tagging</a>
+    </nav>
+    {% if ids %}
+    <form action="show-file/1" method="POST" class="mx-auto" style="display: flex; flex-direction: column;">
+        <h1 class="text-light mx-auto" style="align-self: center;"> Found {{ ids }} images for {{ tags }}</h1>
+        <div class="d-flex justify-content-center my-2">
+            <label for="idaaa" class="col-form-label mx-3">Select tag repository to commit to:</label><select id="idaaa"
+                class="form-select w-25" name="tagrepo">
+                <optgroup label="Local">
+                    {% for tag in tagrepo["local_tags"] %}
+                    {% if tag == tagrepo["local_tags"][-1] %}
+                    <option value="{{tag}}" selected>{{tag}}</option>
+                    {% else %}
+                    <option value="{{tag}}">{{tag}}</option>
+                    {%endif%}
+                    {%endfor%}
+
+                    {# Disabled until petition reason is supported
+                <optgroup label="Remote">
+                    {% for tag in tagrepo["tag_repositories"] %}
+                    <option value="{{tag}}">{{tag}}</option>
+                    {%endfor%}
+                    #}
+            </select>
+        </div>
+        <button class="btn btn-success mx-auto" style="width: 10em;" type="submit">Start</button>
+    </form>
+
+
+    {% else %}
+    <div class="mx-auto" style="display: flex; flex-direction: column;">
+        <h1 class="mx-auto text-white" style="align-self: center;">Did not find anything for {{ tags }}</h1>
+    </div>
+    {% endif %}
+
+</body>
+
+</html>

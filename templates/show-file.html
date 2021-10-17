@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head class="h-100 m-0 p-0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Hydrus Remote Tagging</title>
+    <link rel="stylesheet" href="/static/custom.css">
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <script src="/static/jquery-3.3.1.min.js"></script>
+    <script src="/static/bootstrap.min.js"></script>
+    <!-- <script src="/static/jquery.touchSwipe.min.js"></script> -->
+    {% for url in next_images %}
+    <link rel="preload" as="image" href={{ url }}>
+    {%endfor%}
+    <style type="text/css">
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        span#tag {
+            color: rgb(0, 111, 250);
+        }
+
+        #character {
+            color: rgb(0, 170, 0);
+        }
+
+        #creator {
+            color: rgb(170, 0, 0);
+        }
+
+        #meta {
+            color: rgb(17, 17, 17);
+        }
+
+        #person {
+            color: rgb(0, 128, 0);
+        }
+
+        #series {
+            color: rgb(170, 0, 170);
+        }
+
+        #studio {
+            color: rgb(128, 0, 0);
+        }
+
+        #unnamespaced {
+            color: #72a0c1;
+        }
+    </style>
+</head>
+
+<body style="background: #19191b" class="h-100 p-0 m-0 d-flex overflow-hidden">
+    {{ m }}
+    <!-- NOTE: what the hell is m? -->
+    <div class="d-flex flex-column absolute h-100 w-100 overflow-hidden">
+        <nav style="flex: none; z-index: 10" class="navbar navbar-expand-md navbar-dark bg-dark">
+            <a class="nav-link me-auto" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">ψ Remote
+                Tagging</a>
+            <button type="button" class="btn btn-primary float-end ms-auto me-3" data-bs-toggle="offcanvas"
+                data-bs-target="#metadataSidebar">🛈</button>
+        </nav>
+
+        {% if image %}
+        <main class="text-center overflow-hidden m-auto mx-auto justify-content-center align-self-center">
+            {% if mime.startswith('image') %}
+            <img class="img-responsive mh-100 mw-100" src="{{ image }}">
+            {% elif mime.startswith('video') %}
+            <video controls autoplay loop muted class="mh-100 mw-100">
+                <source src="{{ image }}" type="{{ mime }}">
+            </video>
+            {% else %}
+            <h1 class="mx-auto text-white nm-text" style="align-self: center;">Not an image or video file. Skipping.
+            </h1>
+            {% endif %}
+        </main>
+
+        <div style="z-index: 10"
+            class="mb-0 text-center w-auto d-block float-right font-weight-bold text-white bg-dark">
+            <p class="d-inline">{{ current_id }}/{{ total_ids }}</p>
+        </div>
+        <div class="page-footer bg-dark m-2 d-flex form-group">
+
+            <div class="me-2 flex-grow-1">
+                <input type="text" class="form-control" id="inputTags" autocomplete="off"
+                    placeholder="Comma seperated tags, Backslash to escape">
+            </div>
+            <button type="button" class="btn btn-success" id="submitTags">→</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="offcanvas offcanvas-end bg-dark text-nowrap overflow-auto w-25" data-bs-backdrop="false"
+        id="metadataSidebar">
+
+        <!-- <div class="bg-dark text-light border-muted pb-0 list-group-item list-group-item-action flex-column align-items-start">
+                <h5 class="mb-1 font-weight-bold">Hash</h5>
+                <p>{{ meta['hash'] }}</p>
+            </div> -->
+        <!-- <div class="bg-dark text-light border-muted pb-0 list-group-item list-group-item-action flex-column align-items-start">
+                <h5 class="mb-1 font-weight-bold">Mime</h5>
+                <p>{{ meta['mime'] }}</p>
+            </div> -->
+        <!-- <div class="bg-dark text-light border-muted pb-0 list-group-item list-group-item-action flex-column align-items-start">
+                <h5 class="mb-1 font-weight-bold">Size</h5>
+                <p>{{ filesize }}</p>
+            </div> -->
+        <!-- <div class="bg-dark text-light border-muted pb-0 list-group-item list-group-item-action flex-column align-items-start">
+                <h5 class="mb-1 font-weight-bold">Dimentions</h5>
+                <p>{{ meta['width'] }}px / {{ meta['height'] }}px</p>
+            </div> -->
+        <div class="bg-dark text-light list-group-item">
+            <div class="d-flex justify-content-between">
+                <button type="button"
+                    class="bg-dark text-light border-muted list-group-item list-group-item-action border-0 p-0 collapsed"
+                    data-bs-toggle="collapse" data-bs-target="#known_urls">
+                    <h5 class="mb-1 font-weight-bold">Known Urls</h5>
+                </button>
+                <button type="button" class="btn btn-primary float-end ms-auto me-3" data-bs-toggle="offcanvas"
+                    data-bs-target="#metadataSidebar">⨉</button>
+            </div>
+            <div id="known_urls" class="collapse">
+                {% for url in known_urls %}
+                <a href={{ url }}>{{ url }}</a>
+                <br>
+                {%endfor%}
+            </div>
+        </div>
+
+        <div class="bg-dark text-light list-group-item">
+            <h5 class="mb-2 font-weight-bold">All Known Tags</h5>
+            <div>
+                {% for tag in tags['all_known_tags']['0'] %}
+                {% if tag.startswith("character:") %}
+                <span id="character">{{ tag }}</span>
+                {% elif tag.startswith("creator:") %}
+                <span id="creator">{{ tag }}</span>
+                {% elif tag.startswith("meta:") %}
+                <span id="meta">{{ tag }}</span>
+                {% elif tag.startswith("series:") %}
+                <span id="series">{{ tag }}</span>
+                {% elif tag.startswith("person:") %}
+                <span id="person">{{ tag }}</span>
+                {% elif tag.startswith("studio:") %}
+                <span id="studio">{{ tag }}</span>
+                {% elif ":" in tag %}
+                <span id="unnamespaced">{{ tag }}</span>
+                {% else %}
+                <span id="tag">{{ tag }}</span>
+                {% endif %}
+                <br>
+                {%endfor%}
+            </div>
+        </div>
+    </div>
+
+
+    <script src="/static/show-file.js"></script>
+    <script type="text/javascript">metadata = {{ meta | tojson }}</script>
+    <script>
+
+    </script>
+
+</body>
+
+</html>

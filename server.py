@@ -9,19 +9,21 @@ import requests
 
 app = Flask(__name__)
 app._static_folder = os.path.abspath("templates/static/")
-app.secret_key = "lolicatgirls"
+app.secret_key = "cookiesonfire"
 
 def search_files(api_key, api_url, search_tags):
     cl = hydrus.Client(api_key, api_url)
     fids = cl.search_files(search_tags, True)
     return fids
 
-def archive_file(api_key, api_url, hash):
-    requests.post(api_url+"/add_files/undelete_files", headers={"Hydrus-Client-API-Access-Key":api_key}, json={"hash": hash}) # undelete file first if in trash
-    requests.post(api_url+"/add_files/archive_files", headers={"Hydrus-Client-API-Access-Key": api_key}, json={"hash": hash})
+def get_services(api_key, api_url):
+    cl = hydrus.Client(api_key, api_url)
+    return cl.get_tag_services()
 
-def delete_file(api_key, api_url, hash):
-    requests.post(api_url+"/add_files/delete_files", headers={"Hydrus-Client-API-Access-Key":api_key}, json={"hash": hash})
+def add_tags_to_file(api_key, api_url, hash, tags, tag_repo):
+    cl = hydrus.Client(api_key, api_url)
+    listOfTags = {tag_repo: tags}
+    cl.add_tags([hash], service_to_tags = listOfTags)
 
 def save_session(api_key, api_url, service):
     session['api_key'] = api_key
@@ -54,7 +56,7 @@ def sizeof_fmt(num, suffix='B'):
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
-@app.route('/archive-delete', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 def ad():
     try:
         if request.method == 'GET':
@@ -63,6 +65,7 @@ def ad():
             session['session_id']
         except KeyError:
             generate_session_id()
+
         save_session(request.form.get('api_key'), request.form.get('api_url'), request.form.get('service'))
         api_key = session['api_key']
         api_url = session['api_url']
@@ -75,13 +78,14 @@ def ad():
         fids = search_files(api_key, api_url, clean_tags)
         total_ids = len(fids)
         save_sql(fids)
-        return render_template('archive-delete.html', ids = total_ids, tags = post_tags)
+        print(request.form.get('service') == None)
+        return render_template('results.html', tagrepo = get_services(api_key, api_url), ids = total_ids, tags = post_tags)
     except hydrus.InsufficientAccess:
         return render_template('index.html', error="Insufficient access to Hydrus API")
     except hydrus.ServerError:
         return render_template('index.html', error="Hydrus API encountered a server error")
 
-@app.route('/archive-delete/<id>', methods=['GET', 'POST'])
+@app.route('/show-file/<id>', methods=['GET', 'POST'])
 def ads(id):
     try:
         api_key = session['api_key']
@@ -103,19 +107,30 @@ def ads(id):
         mime = metadata['mime']
         filesize = sizeof_fmt(metadata['size'])
         known_urls = metadata['known_urls']
-        tags = metadata['service_names_to_statuses_to_tags']
-        tags.pop('all known tags')
+        tags = metadata['service_names_to_statuses_to_display_tags']
+        #convert spaces to _ in tag repo name
         tags = { x.translate({32:"_"}) : y  
                  for x, y in tags.items()}
-        if request.method == 'POST':
-            if request.form.get('action') == 'archive':
-                archive_file(api_key, api_url, hash)
-            elif request.form.get('action') == 'delete':
-                delete_file(api_key, api_url, hash)
 
-        return render_template('archive-delete-show.html', image = image, next_images = next_images, nid = nid, current_id = intid, total_ids = total_ids, mime =  mime, meta = metadata, filesize = filesize, known_urls = known_urls, tags = tags)
+        if request.method == 'POST':
+            if request.form.get('tagrepo') != None:
+                session['selectedTagRepo'] = request.form.get('tagrepo')
+            
+
+        return render_template('show-file.html', image = image, next_images = next_images, nid = nid, current_id = intid, total_ids = total_ids, mime =  mime, meta = metadata, filesize = filesize, known_urls = known_urls, tags = tags)
     except IndexError:
         return redirect(url_for('index'))
+
+@app.route('/updateTags', methods=['POST'])
+def ajaxUpdate():
+    # add_tags_to_file(api_key, api_url, hash, tags, tag_repo)
+    # print("////POST RECEIVED")
+    # print(request.form)
+    #print(session["selectedTagRepo"])
+    tags = request.form.get('tags').split(",")
+    hash = request.form.get('hash')
+    add_tags_to_file(session['api_key'],session['api_url'],hash,tags,session['selectedTagRepo'])
+    return jsonify(tags) #updated lsit of tags
 
 @app.route('/', methods=['GET'])
 def index():
@@ -123,4 +138,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=4242, debug=True)
+    app.run(host="0.0.0.0", port=8244, debug=True)
