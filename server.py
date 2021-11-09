@@ -1,3 +1,4 @@
+from typing import cast
 from flask import Flask, request, render_template, url_for, jsonify, session, redirect
 from flask.json import tag
 import hydrus
@@ -12,9 +13,9 @@ app = Flask(__name__)
 app._static_folder = os.path.abspath("templates/static/")
 app.secret_key = "cookiesonfire"
 
-def search_files(api_key, api_url, search_tags):
+def search_files(api_key, api_url, search_tags, inboxBool, archiveBool):
     cl = hydrus.Client(api_key, api_url)
-    fids = cl.search_files(search_tags, False, True)
+    fids = cl.search_files(search_tags, inboxBool, archiveBool)
     return fids
 
 def get_services(api_key, api_url):
@@ -56,6 +57,9 @@ def sizeof_fmt(num, suffix='B'):
 @app.route('/index', methods=['GET', 'POST'])
 def ad():
     try:
+        # TODO: add support for custom tag colors here & save to session['tagColors']
+        # request.form.get('className-x), tagRegex-x, tagColor-x
+        # add jinja templating support for this
         if request.method == 'GET':
             return redirect(url_for('index'))
         try:
@@ -67,15 +71,27 @@ def ad():
         api_key = session['api_key']
         api_url = session['api_url']
         post_tags = request.form.get('tags')
+        session['appendTag'] = []
+        for tag in request.form.get('appendTags').split():
+            session['appendTag'].append(tag.replace('_',' '))
+
+        if 'archive' in request.form.getlist('location'):
+            archiveBool = True
+        else:
+            archiveBool = False
+        if 'inbox' in request.form.getlist('location'):
+            inboxBool = True
+        else:
+            inboxBool = False
+        
         session_id = session['session_id']
         tags = post_tags.split()
         clean_tags = []
         for tag in tags:
             clean_tags.append(tag.replace('_',' '))
-        fids = search_files(api_key, api_url, clean_tags)
+        fids = search_files(api_key, api_url, clean_tags, inboxBool, archiveBool)
         total_ids = len(fids)
         save_sql(fids)
-        print(request.form.get('service') == None)
         return render_template('results.html', tagrepo = get_services(api_key, api_url), ids = total_ids, tags = post_tags)
     except hydrus.InsufficientAccess:
         return render_template('index.html', error="Insufficient access to Hydrus API")
@@ -85,6 +101,7 @@ def ad():
 @app.route('/show-file/<id>', methods=['GET', 'POST'])
 def ads(id):
     try:
+        session['appendTagIsSet'] = False
         api_key = session['api_key']
         if session['api_url'].endswith('/'):
             api_url = session['api_url'][:-1]
@@ -129,71 +146,29 @@ def ads(id):
 
 @app.route('/updateTags', methods=['POST'])
 def ajaxUpdate():
-    # add_tags_to_file(api_key, api_url, hash, tags, tag_repo)
-    print("////POST RECEIVED")
+    
     data = request.get_json()
     tagsToAdd = data['add']
     tagsToDel = data['del']
     hash = data['hash']
     tag_repo = session['selectedTagRepo']
 
-    cl = hydrus.Client(session['api_key'], session['api_url'])
-    # for tag in tags:
-    #     if '0' in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]:
-    #         if tag in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0']:
-    #             tagsToDel.append(tag)
-    #             # tags.remove(tag)
-        
-    # for tag in tags:
-    #     if '2' in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]:
-    #         if tag in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['2']:
-    #             tagsToAdd.append(tag)
-    #             # tags.remove(tag)
-    #         else:
-    #             tagsToAdd.append(tag)
-    #             # tags.remove(tag)
-
-    # i = 0
-    # print("tags to add {0}".format(tagsToAdd))
-    # print("tags to del {0}".format(tagsToDel))
-
-    #FIXME: Allows input tags once, does not allow input again after that until page reload
-    for tag in tagsToDel:
-        if tag_repo in session['metadata']['service_names_to_statuses_to_tags']:
-            # if exists
-            if '0' in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]:
-                if tag in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0']:
-                    session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0'].remove(tag)
-                    if '2' in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]:
-                        session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['2'].append(tag)
-                    else:
-                        session['metadata']['service_names_to_statuses_to_tags'][tag_repo].update({"2":[tag]})
-        else:
-            session['metadata']['service_names_to_statuses_to_tags'].update({tag_repo:{"0":[],"2":[tag]}})
-
-
-    for tag in tagsToAdd:
-        if tag_repo in session['metadata']['service_names_to_statuses_to_tags']:
-            if '2' in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]:
-                if tag in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['2']:
-                    session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['2'].remove(tag)
-                    if '0' in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]:
-                        session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0'].append(tag)
-                    else:
-                        session['metadata']['service_names_to_statuses_to_tags'][tag_repo].update({"0":[tag]})
-                else:
-                    session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0'].append(tag)
-            else:
-                session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0'].append(tag)
-        else:
-            session['metadata']['service_names_to_statuses_to_tags'].update({tag_repo:{"0":[tag],"2":[]}})
+    if not session['appendTagIsSet']:
+        try:
+            if not all(tag in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0'] for tag in session['appendTag']):
+                for tag in session['appendTag']:
+                    if tag not in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0']:
+                        tagsToAdd.append(tag)
+                        session['appendTagIsSet'] = True
+        except KeyError:
+            session['appendTagIsSet'] = True
+            for tag in session['appendTag']:
+                tagsToAdd.append(tag)
 
     listOfTags = {tag_repo: {"0":tagsToAdd, "1":tagsToDel} }
-    print("////LOG")
-    print("current tags {0}".format(session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0']))
-    print("deleted tags {0}".format(session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['2']))
+    cl = hydrus.Client(session['api_key'], session['api_url'])
     cl.add_tags([hash], service_to_action_to_tags = listOfTags)
-
+    
     return jsonify(listOfTags[tag_repo]) #updated lsit of tags
 
 @app.route('/', methods=['GET'])

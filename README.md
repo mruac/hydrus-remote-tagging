@@ -54,3 +54,7 @@ Local tag repositories currently supported.
 * Siblings & Parents are not supported yet!
 
 ## Todo  
+* Custom namespace colors
+  * Settings in main page
+  * "Class name", "Regex", "CSS color"
+  * regex is used to match against tags as they are processed for display

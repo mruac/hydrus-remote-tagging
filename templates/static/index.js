@@ -30,3 +30,5 @@ $('#settings-save-btn').on('click', function() {
 	    $('#settings-save-btn').removeClass('btn-success');
 	  }, 2000); 
 });
+
+// FIXME: add form input validation to only allow alphabetical chars in #tagPresentationModal className-x

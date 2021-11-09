@@ -73,13 +73,13 @@ function toNextFile() {
 };
 
 function insertTag(tag) {
-    //FIXME: convert to class & add gender namespace
-    //TODO: add custom namespace coloring in settings
     var tagel = '<span class="modifiable ';
     if (tag.startsWith("creator:")) {
         tagel += 'creator">';
     } else if (tag.startsWith("meta:")) {
         tagel += 'meta">';
+    } else if (tag.startsWith("character:")) {
+        tagel += 'character">';
     } else if (tag.startsWith("gender:")) {
         tagel += 'gender">';
     } else if (tag.startsWith("series:")) {
@@ -119,11 +119,16 @@ function removeTag(tag) {
 
 function sendTags(tags) {
     //compare tags against current metadata & split into add & del tags
-    //FIXME: currentTags / deletedTags can be undefined if not set
-    var currentTags = metadata["service_names_to_statuses_to_tags"][currentRepo]["0"];
-    var deletedTags = metadata["service_names_to_statuses_to_tags"][currentRepo]["2"];
-    if (currentTags == undefined){currentTags = [];}
-    if (deletedTags == undefined){deletedTags = [];}
+    //FIXME: handle when [currentRepo] doesn't exist - check & initialise
+    if (metadata["service_names_to_statuses_to_tags"][currentRepo] !== undefined) {
+        var currentTags = metadata["service_names_to_statuses_to_tags"][currentRepo]["0"];
+        var deletedTags = metadata["service_names_to_statuses_to_tags"][currentRepo]["2"];
+        if (currentTags == undefined) { currentTags = []; }
+        if (deletedTags == undefined) { deletedTags = []; }
+    } else {
+        currentTags = [];
+        deletedTags = [];
+    }
     var data = {
         "add": [],
         "del": [],
@@ -165,6 +170,7 @@ function sendTags(tags) {
         console.log(response);
         var addTags = response["0"];
         var delTags = response["1"];
+        // FIXME: if tag is added to end twice, 2nd tag isn't given a new line break. eg. for "y","z" => "yz" instead of "y\nz"
         addTags.forEach(tag => { insertTag(tag) });
         delTags.forEach(tag => { removeTag(tag) });
     });

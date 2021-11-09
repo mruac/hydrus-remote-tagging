@@ -22,8 +22,8 @@
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-3">
         <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Remote Tagging</a>
-        <button type="button" class="btn btn-primary float-end ml-auto" data-toggle="modal"
-            data-target="#infoModal">Settings</button>
+        <button type="button" class="btn btn-primary float-end ml-auto" data-bs-toggle="modal"
+            data-bs-target="#tagPresentationModal">Settings</button>
     </nav>
 
     <form action="{{ url_for('ad') }}" method="post">
@@ -33,6 +33,20 @@
             value="{{ session['api_key'] }}" name="api_key" placeholder="API Key" required>
         <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="tags"
             placeholder="Search Tags (underscores for spaces, spaces as seperator)">
+        <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="appendTags"
+            placeholder="Tag(s) to replace Search Tag with (underscore for space, spaces for seperator)">
+        <div class="form-check" style="width: 50%; margin: 10px">
+            <input class="form-check-input" type="radio" value="inbox" id="flexCheckDefault1" name="location" checked>
+            <label class="form-check-label" for="flexCheckDefault1">
+                Inbox
+            </label>
+        </div>
+        <div class="form-check" style="width: 50%; margin: 10px">
+            <input class="form-check-input" type="radio" value="archive" id="flexCheckDefault2" name="location">
+            <label class="form-check-label" for="flexCheckDefault2">
+                Archive
+            </label>
+        </div>
         <button class="btn btn-success" style="margin: 10px" type="submit">Search</button>
     </form>
 
@@ -51,11 +65,59 @@
                         style="width: 50%; margin: 10px" type="text" name="api_url" placeholder="Default API URL">
                     <input id="settings-api-key-input" class="form-control w-100 mx-auto"
                         style="width: 50%; margin: 10px" type="password" name="api_key" placeholder="Default API Key">
+                    <button id="settings-tagpresentation-btn" class="btn btn-primary" style="margin: 10px">Tag
+                        presentation</button>
                     <button id="settings-save-btn" class="btn btn-primary" style="margin: 10px">Save</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="tagPresentationModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Tag Presentation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Regex</th>
+                                <th scope="col">CSS color</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input name="className-1" class="form-control w-100 mx-auto"
+                                        placeholder="Tag / namespace" value="creator"></td>
+                                <td><input name="tagRegex-1" class="form-control w-100 mx-auto"
+                                        placeholder="matching Regex" value="^creator:.*"></td>
+                                <td><input name="tagColor-1" class="form-control w-100 mx-auto" placeholder="CSS color"
+                                        value="#AA0000"></td>
+                            </tr>
+                            <tr>
+                                <td><input name="className-2" class="form-control w-100 mx-auto"
+                                        placeholder="Tag / namespace"></td>
+                                <td><input name="tagRegex-2" class="form-control w-100 mx-auto"
+                                        placeholder="matching Regex"></td>
+                                <td><input name="tagColor-2" class="form-control w-100 mx-auto" placeholder="CSS color">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="settings-save-btn" class="btn btn-primary" style="margin: 10px">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

@@ -50,15 +50,17 @@
         }
 
         .namespaced {
-            color: rgb(0, 111, 250);
+            color: #72a0c1;
         }
 
         .unnamespaced {
-            color: #72a0c1;
+            color: rgb(0, 111, 250);
+
         }
 
         .modifiable {
             font-style: italic;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -163,9 +165,9 @@
                 {% elif tag.startswith("gender:") %}
                     gender">{{ tag }}
                 {% elif ":" in tag %}
-                    unnamespaced">{{ tag }}
-                {% else %}
                     namespaced">{{ tag }}
+                {% else %}
+                    unnamespaced">{{ tag }}
                 {% endif %}
                 </span><br>
                 {%endfor%}
