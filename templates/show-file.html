@@ -21,36 +21,44 @@
             padding: 0;
         }
 
-        span#tag {
-            color: rgb(0, 111, 250);
-        }
-
-        #character {
+        .character {
             color: rgb(0, 170, 0);
         }
 
-        #creator {
+        .creator {
             color: rgb(170, 0, 0);
         }
 
-        #meta {
+        .meta {
             color: rgb(17, 17, 17);
         }
 
-        #person {
+        .person {
             color: rgb(0, 128, 0);
         }
 
-        #series {
+        .series {
             color: rgb(170, 0, 170);
         }
 
-        #studio {
+        .studio {
             color: rgb(128, 0, 0);
         }
 
-        #unnamespaced {
+        .gender {
+            color: #cb9bd9;
+        }
+
+        .namespaced {
+            color: rgb(0, 111, 250);
+        }
+
+        .unnamespaced {
             color: #72a0c1;
+        }
+
+        .modifiable {
+            font-style: italic;
         }
     </style>
 </head>
@@ -134,26 +142,32 @@
 
         <div class="bg-dark text-light list-group-item">
             <h5 class="mb-2 font-weight-bold">All Known Tags</h5>
-            <div>
-                {% for tag in tags['all_known_tags']['0'] %}
-                {% if tag.startswith("character:") %}
-                <span id="character">{{ tag }}</span>
-                {% elif tag.startswith("creator:") %}
-                <span id="creator">{{ tag }}</span>
-                {% elif tag.startswith("meta:") %}
-                <span id="meta">{{ tag }}</span>
-                {% elif tag.startswith("series:") %}
-                <span id="series">{{ tag }}</span>
-                {% elif tag.startswith("person:") %}
-                <span id="person">{{ tag }}</span>
-                {% elif tag.startswith("studio:") %}
-                <span id="studio">{{ tag }}</span>
-                {% elif ":" in tag %}
-                <span id="unnamespaced">{{ tag }}</span>
-                {% else %}
-                <span id="tag">{{ tag }}</span>
+            <div id="listOfTags">
+                {% for tag in meta['service_names_to_statuses_to_tags']['all known tags']['0'] %}
+                <span class="
+                {% if checkModifiable(tag) %}
+                    modifiable
                 {% endif %}
-                <br>
+                {% if tag.startswith("character:") %}
+                    character">{{ tag }}
+                {% elif tag.startswith("creator:") %}
+                    creator">{{ tag }}
+                {% elif tag.startswith("meta:") %}
+                    meta">{{ tag }}
+                {% elif tag.startswith("series:") %}
+                    series">{{ tag }}
+                {% elif tag.startswith("person:") %}
+                    person">{{ tag }}
+                {% elif tag.startswith("studio:") %}
+                    studio">{{ tag }}
+                {% elif tag.startswith("gender:") %}
+                    gender">{{ tag }}
+                {% elif ":" in tag %}
+                    unnamespaced">{{ tag }}
+                {% else %}
+                    namespaced">{{ tag }}
+                {% endif %}
+                </span><br>
                 {%endfor%}
             </div>
         </div>
@@ -161,7 +175,7 @@
 
 
     <script src="/static/show-file.js"></script>
-    <script type="text/javascript">metadata = {{ meta | tojson }}</script>
+    <script type="text/javascript">metadata = {{ meta | tojson }}; currentRepo = "{{ selectedService }}"</script>
     <script>
 
     </script>

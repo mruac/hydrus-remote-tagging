@@ -13,6 +13,17 @@ Try using 127.0.0.1, localhost, or the computers local ip.
 
 **You also might want to change the app.secret_key in the server.py file**
 
+### TODO:
+* double click tag to remove
+* highlight tags that are added in this current session [inverted color div]
+  * Highlighted tags are removable
+  * Limitations: API doesnt show which tags are parents and so parent tags cannot be removed unless the child tag can be identified. Therefore only tags added in the current session is possible.
+* add support to remove tags from text input
+  * parse text input
+  * sort tags based on existing and not-existing
+  * delete existing & add not-existing
+* add support to add tags for all files modified (eg. add `tagged` so that remotely tagged files can be searched again for review)
+
 ### Pages:
 ##### Main
 Text inputs for API URL, API key, search query. "Search" button.
@@ -40,5 +51,6 @@ Local tag repositories currently supported.
 * If {trackRemotelyTaggedWithTag} is `true`, then all files are tagged with {remotelytaggedTag} if changes are made. Else, all files are added to {defaultPageName} Hydrus page
   * Using {remotelytaggedTag} requires no extra permissions.
   * There is no way to create a new page with the name {defaultPageName} via client API yet. The only option for this is via URL Import but this requires a valid url.
+* Siblings & Parents are not supported yet!
 
 ## Todo  
