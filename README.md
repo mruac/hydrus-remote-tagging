@@ -58,3 +58,6 @@ Local tag repositories currently supported.
   * Settings in main page
   * "Class name", "Regex", "CSS color"
   * regex is used to match against tags as they are processed for display
+  * tags are matched top to bottom. If a tag is matched again and already has been given a color, it will not apply.
+
+

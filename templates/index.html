@@ -6,8 +6,9 @@
     <title>Hydrus Remote Tagging</title>
     <link rel="stylesheet" href="/static/bootstrap.min.css">
     <script src="/static/jquery-3.3.1.min.js"></script>
+    <script src="/static/jquery.tablednd.min.js"></script>
     <script src="/static/bootstrap.min.js"></script>
-    <script src="/static/index.js"></script>
+    <script src="/static/index.js" defer></script>
 </head>
 
 <body style="background: #19191b">
@@ -26,7 +27,7 @@
             data-bs-target="#tagPresentationModal">Settings</button>
     </nav>
 
-    <form action="{{ url_for('ad') }}" method="post">
+    <form action="{{ url_for('ad') }}" method="post" class="text-white">
         <input id="api-url-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text"
             value="{{ session['api_url'] }}" name="api_url" placeholder="API URL" required>
         <input id="api-key-input" class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="password"
@@ -82,37 +83,75 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <table class="table">
+                    <div class="alert alert-danger d-none" role="alert" id="entryAlert">
+                        Allowed characters in <b>Name</b>: a-z, A-Z, dash, underscore
+                    </div>
+                    <table class="table align-middle" id="tagPresentation">
                         <thead>
-                            <tr>
+                            <tr class="nodrag nodrop">
+                                <th scope="col"><input class="form-check-input" type="checkbox" value="" id="allCheck" disabled></th>
                                 <th scope="col">Name</th>
                                 <th scope="col">Regex</th>
-                                <th scope="col">CSS color</th>
+                                <th scope="col">Color</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="font-monospace">
+                            {% for namespace in namespaces %}
                             <tr>
-                                <td><input name="className-1" class="form-control w-100 mx-auto"
-                                        placeholder="Tag / namespace" value="creator"></td>
-                                <td><input name="tagRegex-1" class="form-control w-100 mx-auto"
-                                        placeholder="matching Regex" value="^creator:.*"></td>
-                                <td><input name="tagColor-1" class="form-control w-100 mx-auto" placeholder="CSS color"
-                                        value="#AA0000"></td>
+                                <td><input class="form-check-input select-entry" type="checkbox" value="" disabled>
+                                </td>
+                                <td class="entry-name">{{ namespace[0] }}</td>
+                                <td class="entry-regex">{{ namespace[1] }}</td>
+                                <td><input type="color" class="form-control form-control-color"
+                                        value="{{ namespace[2] }}" title="Choose your color" disabled></td>
                             </tr>
-                            <tr>
-                                <td><input name="className-2" class="form-control w-100 mx-auto"
-                                        placeholder="Tag / namespace"></td>
-                                <td><input name="tagRegex-2" class="form-control w-100 mx-auto"
-                                        placeholder="matching Regex"></td>
-                                <td><input name="tagColor-2" class="form-control w-100 mx-auto" placeholder="CSS color">
+                            {% endfor %}
+                            <!-- <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input disabled class="form-check-input" type="checkbox" value=""
+                                            id="flexCheckDefault">
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>creator</td>
+                                <td>^creator:.*</td>
+                                <td><input disabled name="tagColor-1" type="color"
+                                        class="form-control form-control-color" value="#AA0000"
+                                        title="Choose your color">
                                 </td>
                             </tr>
+                            <tr disabled>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input name="className-1" type="text" class="form-control w-100 mx-auto"
+                                        placeholder="Tag / namespace" value="character" disabled></td>
+                                <td><input name="tagRegex-1" type="text" class="form-control w-100 mx-auto"
+                                        placeholder="matching Regex" value="^character:.*" disabled></td>
+                                <td><input name="tagColor-1" type="color" class="form-control form-control-color"
+                                        value="#00aa00" title="Choose your color" disabled>
+                                </td>
+                            </tr> -->
                         </tbody>
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button id="settings-save-btn" class="btn btn-primary" style="margin: 10px">Save</button>
+                    <button type="button" class="btn btn-secondary d-none" id="resetEntry">Reset to Defaults</button>
+                    <div class="btn-group d-none" id="editEntry">
+                        <button type="button" class="btn btn-danger" id="deleteEntry">Delete</button>
+                        <button type="button" class="btn btn-success" id="addEntry">Add</button>
+                    </div>
+                    <div class="btn-group">
+                        <input type="checkbox" class="btn-check" id="modifyMode" autocomplete="off">
+                        <label class="btn btn-outline-warning" for="modifyMode" >Modify</label>
+                        <button type="button" id="save-colors-btn" class="btn btn-primary">Save</button>
+                    </div>
                 </div>
             </div>
         </div>

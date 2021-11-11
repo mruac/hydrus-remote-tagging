@@ -21,42 +21,9 @@
             padding: 0;
         }
 
-        .character {
-            color: rgb(0, 170, 0);
-        }
-
-        .creator {
-            color: rgb(170, 0, 0);
-        }
-
-        .meta {
-            color: rgb(17, 17, 17);
-        }
-
-        .person {
-            color: rgb(0, 128, 0);
-        }
-
-        .series {
-            color: rgb(170, 0, 170);
-        }
-
-        .studio {
-            color: rgb(128, 0, 0);
-        }
-
-        .gender {
-            color: #cb9bd9;
-        }
-
-        .namespaced {
-            color: #72a0c1;
-        }
-
-        .unnamespaced {
-            color: rgb(0, 111, 250);
-
-        }
+        {% for namespace in namespaces %}
+        .{{namespace[0]}}{color:{{namespace[2]}};}
+        {% endfor %}
 
         .modifiable {
             font-style: italic;
@@ -150,25 +117,7 @@
                 {% if checkModifiable(tag) %}
                     modifiable
                 {% endif %}
-                {% if tag.startswith("character:") %}
-                    character">{{ tag }}
-                {% elif tag.startswith("creator:") %}
-                    creator">{{ tag }}
-                {% elif tag.startswith("meta:") %}
-                    meta">{{ tag }}
-                {% elif tag.startswith("series:") %}
-                    series">{{ tag }}
-                {% elif tag.startswith("person:") %}
-                    person">{{ tag }}
-                {% elif tag.startswith("studio:") %}
-                    studio">{{ tag }}
-                {% elif tag.startswith("gender:") %}
-                    gender">{{ tag }}
-                {% elif ":" in tag %}
-                    namespaced">{{ tag }}
-                {% else %}
-                    unnamespaced">{{ tag }}
-                {% endif %}
+                {{matchNamespace(tag)}}">{{tag}}
                 </span><br>
                 {%endfor%}
             </div>
