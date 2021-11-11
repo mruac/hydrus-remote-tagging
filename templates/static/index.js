@@ -11,7 +11,7 @@ if ((localStorage.getItem('tagPresentation') != null)) {
     $.ajax({
         type: "POST",
         url: "/updatePrefs",
-        data: JSON.stringify({"namespaceColors":localStorage.getItem('tagPresentation')}),
+        data: localStorage.getItem('tagPresentation'),
         dataType: "json",
         contentType: "application/json; charset=utf-8"
     });

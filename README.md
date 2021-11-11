@@ -51,13 +51,14 @@ Local tag repositories currently supported.
 * If {trackRemotelyTaggedWithTag} is `true`, then all files are tagged with {remotelytaggedTag} if changes are made. Else, all files are added to {defaultPageName} Hydrus page
   * Using {remotelytaggedTag} requires no extra permissions.
   * There is no way to create a new page with the name {defaultPageName} via client API yet. The only option for this is via URL Import but this requires a valid url.
-* Siblings & Parents are not supported yet!
-
-## Todo  
+* Siblings & Parents are not supported yet! This will be implemented when the Client API supports it.
 * Custom namespace colors
   * Settings in main page
   * "Class name", "Regex", "CSS color"
   * regex is used to match against tags as they are processed for display
   * tags are matched top to bottom. If a tag is matched again and already has been given a color, it will not apply.
+  
+## Todo  
+* Add a way to export / import namespace settings
 
 

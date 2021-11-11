@@ -158,11 +158,10 @@ def ads(id):
             for namespace in session['namespaceColors']:
                 if re.fullmatch(namespace[1], tag):
                     return namespace[0]
-            return ["unnamespaced", "^(?!.*:).*$", "#00aaff"]
-        #FIXME: add #ffffff as default tag color & if a regex fails
+            return ""
 
         return render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=intid, total_ids=total_ids, mime=mime, meta=metadata, filesize=filesize, known_urls=known_urls, selectedService=session['selectedTagRepo'], checkModifiable=checkModifiable, matchNamespace=matchNamespace, namespaces=session['namespaceColors'])
-    except IndexError: #FIXME: add support for expired session, when you come back to a show-file/123 after 2 hours and you get the error.
+    except IndexError: #FIXME: add support for expired session, when you come back to show-file/123 after 2 hours or so and you get the error.
         return redirect(url_for('index'))
 
 
