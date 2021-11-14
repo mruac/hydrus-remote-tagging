@@ -25,7 +25,7 @@
         .{{namespace[0]}}{color:{{namespace[2]}};}
         {% endfor %}
 
-        
+
 
         .modifiable {
             font-style: italic;
@@ -128,9 +128,10 @@
 
 
     <script src="/static/show-file.js"></script>
-    <script type="text/javascript">metadata = {{ meta | tojson }}; currentRepo = "{{ selectedService }}"</script>
-    <script>
-
+    <script type="text/javascript">
+    metadata = {{ meta | tojson }};
+    currentRepo = "{{ selectedService }}";
+    namespaceColors = {{ namespaces | tojson }};
     </script>
 
 </body>

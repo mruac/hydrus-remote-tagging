@@ -58,7 +58,15 @@ Local tag repositories currently supported.
   * regex is used to match against tags as they are processed for display
   * tags are matched top to bottom. If a tag is matched again and already has been given a color, it will not apply.
   
-## Todo  
+## TODO:  
 * Add a way to export / import namespace settings
+  * Add option to switch namespace settings GUI to text-only. Easy export/import!
+* Re-enable api settings
+* Include file has in info to allow looking up in client later on
 
-
+## FIXME:
+* namespace color not being applied on new tags, before reloading page.
+  * replace if/else conditions with regex matching from session['namespaceColors'] in insertTag(tag) in show-file.js
+  * Problem: it's going to match tags to a python regex using JS regex engine. not going to go good.
+  * Solution: flask is to match and send back a list of true / false matches as a response when it receives tags to update.
+* clicking out of tag list other than input field should close it.

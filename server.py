@@ -184,12 +184,18 @@ def ajaxUpdate():
             session['appendTagIsSet'] = True
             for tag in session['appendTag']:
                 tagsToAdd.append(tag)
+    matchedTags = {}
+    for tag in tagsToAdd:
+        for namespace in session['namespaceColors']:
+            if re.fullmatch(namespace[1], tag):
+                matchedTags.update({tag:namespace[0]})
+                break
 
     listOfTags = {tag_repo: {"0": tagsToAdd, "1": tagsToDel}}
     cl = hydrus.Client(session['api_key'], session['api_url'])
     cl.add_tags([hash], service_to_action_to_tags=listOfTags)
-
-    return jsonify(listOfTags[tag_repo])  # updated lsit of tags
+    listOfTags.update({"matches":matchedTags})
+    return jsonify(listOfTags)  # updated lsit of tags
 
 
 @app.route('/updatePrefs', methods=['POST'])

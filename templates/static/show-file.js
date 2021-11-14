@@ -72,28 +72,10 @@ function toNextFile() {
     window.location = next;
 };
 
-function insertTag(tag) {
-    var tagel = '<span class="modifiable ';
-    if (tag.startsWith("creator:")) {
-        tagel += 'creator">';
-    } else if (tag.startsWith("meta:")) {
-        tagel += 'meta">';
-    } else if (tag.startsWith("character:")) {
-        tagel += 'character">';
-    } else if (tag.startsWith("gender:")) {
-        tagel += 'gender">';
-    } else if (tag.startsWith("series:")) {
-        tagel += 'series">';
-    } else if (tag.startsWith("person:")) {
-        tagel += 'person">';
-    } else if (tag.startsWith("studio:")) {
-        tagel += 'studio">';
-    } else if (tag.indexOf(":") == 0) {
-        tagel += 'namespaced">'
-    } else {
-        tagel += 'unnamespaced">';
-    }
-    tagel += `${tag}</span>`;
+//flask renders a var object with namespaces and colors
+
+function insertTag(tag, className) {
+    var tagel = `<span class="modifiable ${className}">${tag}</span>`;
 
     if (tag > $.trim($("#listOfTags span:last").text())) {
         $("#listOfTags").append(`${tagel}`);
@@ -162,16 +144,12 @@ function sendTags(tags) {
         dataType: "json",
         contentType: "application/json; charset=utf-8"
     }).done(function (response) {
-        //"live" update to prevent re-fetching tags. May need to redo this if using Displayed tags
-        //input testing results
-        //tag,tag = client:keep, hydrus:delete
-        //emptytag = client:adds "", hydrus:does nothing
         $("#inputTags").val("");
         console.log(response);
-        var addTags = response["0"];
-        var delTags = response["1"];
+        var addTags = response[currentRepo]["0"];
+        var delTags = response[currentRepo]["1"];
         // FIXME: if tag is added to end twice, 2nd tag isn't given a new line break. eg. for "y","z" => "yz" instead of "y\nz"
-        addTags.forEach(tag => { insertTag(tag) });
+        addTags.forEach(tag => { insertTag(tag, response["matches"][tag]) });
         delTags.forEach(tag => { removeTag(tag) });
     });
 };
