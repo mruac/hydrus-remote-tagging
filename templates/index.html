@@ -35,7 +35,7 @@
         <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="tags"
             placeholder="Search Tags (underscores for spaces, spaces as seperator)">
         <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="appendTags"
-            placeholder="Tag(s) to replace Search Tag with (underscore for space, spaces for seperator)">
+            placeholder="Tag(s) to append for each tagged file">
         <div class="form-check" style="width: 50%; margin: 10px">
             <input class="form-check-input" type="radio" value="inbox" id="flexCheckDefault1" name="location" checked>
             <label class="form-check-label" for="flexCheckDefault1">
@@ -74,21 +74,20 @@
         </div>
     </div>
 
-    <div class="modal fade" id="tagPresentationModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="tagPresentationModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Tag Presentation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" >Tag Presentation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body table-responsive" >
                     <div class="alert alert-danger d-none" role="alert" id="entryAlert">
                         Allowed characters in <b>Name</b>: a-z, A-Z, 0-9, dash, underscore. Names cannot begin with a
                         number.
                     </div>
                     <div class="alert alert-danger d-none" role="alert" id="textformatAlert">Incorrect text-only format.</div>
-                    <table class="table align-middle" id="inputGUI">
+                    <table class="table align-middle d-none" id="inputGUI">
                         <thead>
                             <tr class="nodrag nodrop">
                                 <th scope="col"><input class="form-check-input" type="checkbox" value="" id="allCheck"
@@ -144,8 +143,8 @@
                             </tr> -->
                         </tbody>
                     </table>
-                    <div class="form-floating font-monospace d-none" id="inputText">
-                        <textarea class="form-control" id="inputTextarea" wrap="off" style="height: 20em;"></textarea>
+                    <div class="form-floating font-monospace" id="inputText">
+                        <textarea class="form-control" id="inputTextarea" wrap="off" style="height: 20em;" disabled></textarea>
                         <label for="inputTextarea">["class-name","Python regex","#ffffff"] per line</label>
                     </div>
                 </div>

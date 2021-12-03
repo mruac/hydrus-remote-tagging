@@ -24,8 +24,12 @@ if ((localStorage.getItem('tagPresentation') != null)) {
     JSON.parse(localStorage.getItem('tagPresentation'))["namespaceColors"].forEach(function (v, i) {
         $(`<tr><td><input class="form-check-input select-entry" type="checkbox" value="" disabled></td><td>${v[0]}</td><td>${v[1]}</td><td><input type="color" class="form-control form-control-color" value="${v[2]}" title="Choose your color" disabled></td></tr>`).appendTo("#inputGUI tbody")
     });
-    $("#inputGUI").tableDnDUpdate();
 
+    var res = ``;
+    JSON.parse(localStorage.tagPresentation)['namespaceColors'].forEach(function(v,i){
+        res += String.raw`${JSON.stringify(v).replace(/\\\\/g, '\\')}` + `\n`;
+    });
+    $("#inputTextarea").val(res);
 }
 
 document.getElementById('settings-api-url-input').value = localStorage.getItem('api-url')
@@ -51,10 +55,6 @@ $('#settings-save-btn').on('click', function () {
         $('#settings-save-btn').text('Save');
         $('#settings-save-btn').removeClass('btn-success');
     }, 2000);
-});
-
-$(document).ready(function () {
-    $("#inputGUI").tableDnD();
 });
 
 /*
@@ -92,12 +92,11 @@ $('#modifyMode').change(function () {
         $("#switchEntryMode").removeClass("d-none");
         $("#resetEntry").removeClass("d-none");
 
-        if ($('#inputGUI').hasClass("d-none")) {
+        if ($('#inputGUI').hasClass("d-none")) { //if gui hidden, show textarea
             $("#inputTextarea").prop("disabled", false);
         }
 
-        if ($('#inputText').hasClass("d-none")) {
-            //if table visible
+        if ($('#inputText').hasClass("d-none")) { //if textarea hidden, show gui
             $("#editEntry").removeClass("d-none");
             $("#allCheck").prop('disabled', false);
             $('#submitEntry').prop('disabled', true);
@@ -178,8 +177,11 @@ $('#modifyMode').change(function () {
 $("#switchEntryMode").click(function () {
     if ($('#inputGUI').hasClass("d-none")) {
         //if textarea mode, switch to table mode
-        val = $("#inputTextarea").val().replace(/\n/g, ',').replace(/\\/g, '\\\\');
-        if (val.endsWith(",")) { val = val.slice(0, -1); } //remove comma at end of string in case last char is newline
+        $("#inputGUI tbody tr").each(function (i, v) {
+            $(v).remove();
+        });
+        var val = $("#inputTextarea").val().replace(/\n/g, ',').replace(/\\/g, '\\\\');
+        val = val.replace(/,+$/m, "") //remove comma(s) at end of string in case last char is newline
         try {
             val = JSON.parse(`{"0":[${val}]}`)["0"]; //lazy way to parse string to array, lol
         } catch {
@@ -197,9 +199,10 @@ $("#switchEntryMode").click(function () {
         $("#inputText").addClass("d-none");
         $("#textformatAlert").addClass("d-none");
         $("#editEntry").removeClass("d-none");
-    }else{
+    } else {
         //if table mode, switch to textarea mode
         $("#editEntry").addClass("d-none");
+        $("#inputTextarea").val('');
         //read from table rows and fill in textarea value
         var val = ``;
         $("#inputGUI tbody tr").each(function (i, v) {
@@ -233,8 +236,6 @@ function validateName(name) {
     } else { return false; }
 }
 
-
-
 $('#addEntry').click(function () {
     if ($("#modifyMode").prop('checked')) {
         $(`<tr><td class="entry-name"><input class="form-check-input select-entry" type="checkbox" value=""></td><td><input type="text" class="form-control w-100 mx-auto" placeholder="Tag / namespace" value=""></td><td class="entry-regex"><input type="text" class="form-control w-100 mx-auto" placeholder="Python Regex" value=""></td><td><input type="color" class="form-control form-control-color" value="" title="Choose your color"></td></tr>`).appendTo("#inputGUI tbody");
@@ -253,23 +254,35 @@ $('#addEntry').click(function () {
 //if (!validateName(v[0])){$("#resetEntry").addClass("d-none"); return;}
 $('#submitEntry').on('click', function () {
     if (!$('#modifyMode').is(':checked')) {
-        var tagPresentationDict = { "namespaceColors": [] } //{"studio":[regex,"hex color"]}
+        if ($('#inputGUI').hasClass("d-none")) {
+            //if textarea is visible
+            var val = $("#inputTextarea").val().replace(/\n/g, ',').replace(/\\/g, '\\\\');
+            val = val.replace(/,+$/m, "") //remove comma(s) at end of string in case last char is newline    
+            var tagPresentationDict = `{ "namespaceColors": [${val}] }`; //{"studio":[regex,"hex color"]}
+        } else {
+            //if table is visible
+            var arr = []
+            $("#inputGUI tbody tr").each(function (i, v) {
+                var name = $($(v).children()[1]).text();
+                var regex = $($(v).children()[2]).text();
+                var color = $(v).find('[type=color]').val();
+                arr.push([name, regex, color]);
+            })
+            var tagPresentationDict = JSON.stringify({ "namespaceColors": arr }) //{"studio":[regex,"hex color"]}
+        }
 
-        $("#inputGUI tbody tr").each(function (i, v) {
-            var name = $($(v).children()[1]).text();
-            var regex = $($(v).children()[2]).text();
-            var color = $(v).find('[type=color]').val();
-            tagPresentationDict["namespaceColors"].push([name, regex, color]);
-        })
-        localStorage.setItem("tagPresentation", JSON.stringify(tagPresentationDict))
+        localStorage.setItem("tagPresentation", tagPresentationDict)
         //send to /updatePrefs
         $.ajax({
             type: "POST",
             url: "/updatePrefs",
-            data: JSON.stringify(tagPresentationDict),
+            data: tagPresentationDict,
             dataType: "json",
             contentType: "application/json; charset=utf-8"
+        }).done(function(response){
+            console.log(`sent prefs:\n${tagPresentationDict}`)
         });
+
     }
 })
 
@@ -277,7 +290,7 @@ $('#resetEntry').click(function () {
     if ($('#inputGUI').hasClass("d-none")) {
         //textarea visible
         $("#inputTextarea").val(
-`["character", "^character:.*$", "#00aa00"]
+            `["character", "^character:.*$", "#00aa00"]
 ["creator", "^creator:.*$", "#ff0000"]
 ["meta", "^meta:.*$", "#6f6f6f"]
 ["person", "^person:.*$", "#008000"]
@@ -310,4 +323,3 @@ $('#resetEntry').click(function () {
 
     }
 });
-
