@@ -49,7 +49,7 @@ $(document).keyup(function (e) {
 });
 
 //Submit #inputTags (Enter)
-$(document).keypress(function (e) {
+$(document).keyup(function (e) {
     if (e.which == 13 && submitToggle) {
         tags = $("#inputTags").val();
         if (tags == "") {

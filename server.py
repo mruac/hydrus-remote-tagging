@@ -60,13 +60,17 @@ def get_fids_from_sql():
         fids = cur.fetchone()
     return fids
 
-
-def sizeof_fmt(num, suffix='B'):
-    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
-        if abs(num) < 1024.0:
-            return "%3.1f%s%s" % (num, unit, suffix)
-        num /= 1024.0
-    return "%.1f%s%s" % (num, 'Yi', suffix)
+defaultnamespaceColors = [
+    # ["className","regex","hexColor"], apply top to bottom
+    ["character", "^character:.*$", "#00aa00"],
+    ["creator", "^creator:.*$", "#ff0000"],
+    ["meta", "^meta:.*$", "#6f6f6f"],  # default #111111
+    ["person", "^person:.*$", "#008000"],
+    ["series", "^series:.*$", "#d200d2"],
+    ["studio", "^studio:.*$", "#ff0000"],
+    ["namespaced", "^.*:.*$", "#72a0c1"],
+    ["unnamespaced", "^(?!.*:).*$", "#00aaff"]
+]
 
 
 @app.route('/index', methods=['GET', 'POST'])
@@ -140,15 +144,6 @@ def ads(id):
                        api_key, api_url+"/get_files/file?file_id="+str(int(fids[intid+3]))+"&Hydrus-Client-API-Access-Key="+api_key, api_url+"/get_files/file?file_id="+str(int(fids[intid+4]))+"&Hydrus-Client-API-Access-Key="+api_key]
         metadata = json.loads(json.dumps(cl.file_metadata(file_ids=[iid])[0]))
         session['metadata'] = metadata
-        hash = metadata['hash']
-        mime = metadata['mime']
-        filesize = sizeof_fmt(metadata['size'])
-        known_urls = metadata['known_urls']
-        # displayTags = metadata['service_names_to_statuses_to_display_tags']
-        # #convert spaces to _ in tag repo name
-        # tags = { x.translate({32:"_"}) : y
-        #          for x, y in tags.items()}
-
         if request.method == 'POST':
             if request.form.get('tagrepo') != None:
                 session['selectedTagRepo'] = request.form.get('tagrepo')
@@ -171,7 +166,7 @@ def ads(id):
         return render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=intid, total_ids=total_ids, mime=mime, meta=metadata, filesize=filesize, known_urls=known_urls, selectedService=session['selectedTagRepo'], checkModifiable=checkModifiable, matchNamespace=matchNamespace, namespaces=session['namespaceColors'])
     except IndexError:
         return redirect(url_for('index'))
-    except KeyError: #expired session
+    except KeyError:  # expired session
         return redirect(url_for('index'))
 
 
@@ -211,28 +206,18 @@ def ajaxUpdate():
 @app.route('/updatePrefs', methods=['POST'])
 def updatePrefs():
     data = request.get_json()
+    if data['namespaceColors'] == "":
+        # return default namespace colors if there is no custom namespaceColors
+        session['namespaceColors'] = defaultnamespaceColors
+        return jsonify({"namespaceColors": session['namespaceColors']})
     session['namespaceColors'] = data['namespaceColors']
     # print(session['namespaceColors'])
-    return data
+    return jsonify({"namespaceColors": session['namespaceColors']})
+
 
 @app.route('/', methods=['GET'])
 def index():
-    try:
-        session['namespaceColors']
-        # print(session['namespaceColors'])
-    except KeyError:
-        session['namespaceColors'] = [
-            # ["className","regex","hexColor"], apply top to bottom
-            ["character", "^character:.*$", "#00aa00"],
-            ["creator", "^creator:.*$", "#ff0000"],
-            ["meta", "^meta:.*$", "#6f6f6f"],  # default #111111
-            ["person", "^person:.*$", "#008000"],
-            ["series", "^series:.*$", "#d200d2"],
-            ["studio", "^studio:.*$", "#ff0000"],
-            ["namespaced", "^.*:.*$", "#72a0c1"],
-            ["unnamespaced", "^(?!.*:).*$", "#00aaff"]
-        ]
-    return render_template('index.html', namespaces=session['namespaceColors'])
+    return render_template('index.html')
 
 
 if __name__ == '__main__':
