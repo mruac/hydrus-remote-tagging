@@ -18,12 +18,6 @@ HRT uses a storage system to manage cookies instead of using the default 4KB ses
 
 **You also might want to change the app.secret_key in the `server.py` file**
 
-### TODO:
-* Disable TableDND in view mode, enable in Edit mode.
-
-## FIXME:
-* 
-
 ## Pages:
 ### Main
 * Text inputs for `API URL`, `API key`, `search query`, `tag(s) to append for each tagged file`. Radio button to choose to search from `inbox` or `archive`. `Search` button to submit.

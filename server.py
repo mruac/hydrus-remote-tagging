@@ -163,7 +163,7 @@ def ads(id):
                     return namespace[0]
             return ""
 
-        return render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=intid, total_ids=total_ids, mime=mime, meta=metadata, filesize=filesize, known_urls=known_urls, selectedService=session['selectedTagRepo'], checkModifiable=checkModifiable, matchNamespace=matchNamespace, namespaces=session['namespaceColors'])
+        return render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=intid, total_ids=total_ids, meta=metadata, selectedService=session['selectedTagRepo'], checkModifiable=checkModifiable, matchNamespace=matchNamespace, namespaces=session['namespaceColors'])
     except IndexError:
         return redirect(url_for('index'))
     except KeyError:  # expired session
