@@ -1,13 +1,12 @@
 var defaultnamespaceColors;
 if ((localStorage.getItem('api-url') != null) && (localStorage.getItem('api-url') != "")) {
     $("#api-url-input").val(localStorage.getItem('api-url'));
+    $("#settings-api-url-input").val(localStorage.getItem('api-url'));
 }
 if ((localStorage.getItem('api-key') != null) && (localStorage.getItem('api-key') != "")) {
     $("#api-key-input").val(localStorage.getItem('api-key'));
+    $("#settings-api-key-input").val(localStorage.getItem('api-key'));
 }
-
-$("#settings-api-url-input").val(localStorage.getItem('api-url'));
-$("#settings-api-key-input").val(localStorage.getItem('api-key'));
 
 $.ajax({
     type: "POST",
@@ -92,9 +91,9 @@ function validateName(name) {
 
 $('#submitEntry').on('click', function () {
     if (!$('#modifyMode').is(':checked')) {
-        var val = $("#inputTextarea").val().replace(/\n/g, ',').replace(/\\/g, '\\\\');
+        var val = $("#inputTextarea").val().replace(/\n/g, ',');
         val = val.replace(/,+$/m, "") //remove comma(s) at end of string in case last char is newline    
-        var tagPresentationDict = `{ "namespaceColors": [${val}] }`; //{"studio":[regex,"hex color"]}
+        var tagPresentationDict = `{ "namespaceColors": [${val.replace(/\\/g, '\\\\')}] }`; //{"studio":[regex,"hex color"]}
 
         localStorage.setItem("api-url", $("#settings-api-url-input").val());
         localStorage.setItem("api-key", $("#settings-api-key-input").val());    

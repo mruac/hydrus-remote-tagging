@@ -134,14 +134,17 @@ def ads(id):
         cl = hydrus.Client(api_key, api_url)
         fids = get_fids_from_sql()
         fids = list(fids)[0].split(',')
-        intid = int(id)
+        intid = int(id) - 1
         iid = int(fids[intid])
         nid = str(int(id) + 1)
         total_ids = len(fids)
         image = api_url+"/get_files/file?file_id=" + \
             str(int(fids[intid]))+"&Hydrus-Client-API-Access-Key="+api_key
-        next_images = [api_url+"/get_files/file?file_id="+str(int(fids[intid+1]))+"&Hydrus-Client-API-Access-Key="+api_key, api_url+"/get_files/file?file_id="+str(int(fids[intid+2]))+"&Hydrus-Client-API-Access-Key=" +
-                       api_key, api_url+"/get_files/file?file_id="+str(int(fids[intid+3]))+"&Hydrus-Client-API-Access-Key="+api_key, api_url+"/get_files/file?file_id="+str(int(fids[intid+4]))+"&Hydrus-Client-API-Access-Key="+api_key]
+        next_images = []
+        i = 1
+        while i < 4 and intid+i < total_ids:
+            next_images.append(api_url+"/get_files/file?file_id="+str(int(fids[intid+i]))+"&Hydrus-Client-API-Access-Key="+api_key)
+            i += 1
         metadata = json.loads(json.dumps(cl.file_metadata(file_ids=[iid])[0]))
         session['metadata'] = metadata
         if request.method == 'POST':
@@ -163,7 +166,7 @@ def ads(id):
                     return namespace[0]
             return ""
 
-        return render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=intid, total_ids=total_ids, meta=metadata, selectedService=session['selectedTagRepo'], checkModifiable=checkModifiable, matchNamespace=matchNamespace, namespaces=session['namespaceColors'])
+        return render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=id, total_ids=total_ids, meta=metadata, selectedService=session['selectedTagRepo'], checkModifiable=checkModifiable, matchNamespace=matchNamespace, namespaces=session['namespaceColors'])
     except IndexError:
         return redirect(url_for('index'))
     except KeyError:  # expired session

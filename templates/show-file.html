@@ -57,11 +57,11 @@
 
         {% if image %}
         <main class="text-center overflow-hidden m-auto mx-auto justify-content-center align-self-center">
-            {% if mime.startswith('image') %}
+            {% if meta['mime'].startswith('image') %}
             <img class="img-responsive mh-100 mw-100" src="{{ image }}">
-            {% elif mime.startswith('video') %}
+            {% elif meta['mime'].startswith('video') %}
             <video controls autoplay loop muted class="mh-100 mw-100">
-                <source src="{{ image }}" type="{{ mime }}">
+                <source src="{{ image }}" type="{{ meta['mime'] }}">
             </video>
             {% else %}
             <h1 class="mx-auto text-white nm-text" style="align-self: center;">Not an image or video file. Skipping.
