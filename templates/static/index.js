@@ -18,7 +18,7 @@ $.ajax({
 
     var res = ``;
     response['namespaceColors'].forEach(function (v, i) {
-        res += String.raw`${JSON.stringify(v)}` + `\n`;
+        res += String.raw`${JSON.stringify(v).replace(/\\\\/g, '\\')}` + `\n`;
     });
     defaultnamespaceColors = res;
 });
@@ -35,7 +35,7 @@ if ((localStorage.getItem('tagPresentation') != null)) {
 
     var res = ``;
     JSON.parse(localStorage.tagPresentation)['namespaceColors'].forEach(function (v, i) {
-        res += String.raw`${JSON.stringify(v)}` + `\n`;
+        res += String.raw`${JSON.stringify(v).replace(/\\\\/g, '\\')}` + `\n`;
     });
     $("#inputTextarea").val(res);
 } else {
