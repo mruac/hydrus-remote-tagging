@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="/static/bootstrap.min.css">
     <script src="/static/jquery-3.3.1.min.js"></script>
     <script src="/static/bootstrap.min.js"></script>
-    <!-- <script src="/static/jquery.touchSwipe.min.js"></script> -->
     {% for url in next_images %}
     <link rel="preload" as="image" href={{ url }}>
     {%endfor%}
@@ -42,8 +41,6 @@
 </head>
 
 <body style="background: #19191b" class="h-100 p-0 m-0 d-flex overflow-hidden">
-    {{ m }}
-    <!-- NOTE: what the hell is m? -->
     <div class="d-flex flex-column absolute h-100 w-100 overflow-hidden">
         <nav style="flex: none; z-index: 10" class="navbar navbar-expand-md navbar-dark bg-dark">
             <a class="nav-link me-auto" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">ψ Remote
@@ -99,26 +96,10 @@
                     </path>
                 </svg></button>
             <button type="button" class="btn btn-primary float-end" data-bs-toggle="offcanvas"
-                data-bs-target="#metadataSidebar">╳</button>
+                data-bs-target="#metadataSidebar">X</button>
         </div>
 
         <div class="text-nowrap overflow-auto h-100">
-            <!-- <div class="bg-dark text-light border-muted pb-0 list-group-item list-group-item-action flex-column align-items-start">
-                <h5 class="mb-1 font-weight-bold">Hash</h5>
-                <p>{{ meta['hash'] }}</p>
-            </div> -->
-            <!-- <div class="bg-dark text-light border-muted pb-0 list-group-item list-group-item-action flex-column align-items-start">
-                <h5 class="mb-1 font-weight-bold">Mime</h5>
-                <p>{{ meta['mime'] }}</p>
-            </div> -->
-            <!-- <div class="bg-dark text-light border-muted pb-0 list-group-item list-group-item-action flex-column align-items-start">
-                <h5 class="mb-1 font-weight-bold">Size</h5>
-                <p>{{ filesize }}</p>
-            </div> -->
-            <!-- <div class="bg-dark text-light border-muted pb-0 list-group-item list-group-item-action flex-column align-items-start">
-                <h5 class="mb-1 font-weight-bold">Dimentions</h5>
-                <p>{{ meta['width'] }}px / {{ meta['height'] }}px</p>
-            </div> -->
             <div class="bg-dark text-light list-group-item">
                 <div class="collapse" id="file_metadata">
                     <div>

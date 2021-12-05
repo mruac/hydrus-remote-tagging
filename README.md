@@ -11,7 +11,7 @@ Flask-Session
 # How to use
 Just run `$ python server.py`  
 
-By default the server runs on http://0.0.0.0:8244, if you are on windows you might not be able to connect to `0.0.0.0`.  
+By default the server runs on http://0.0.0.0:8243, if you are on windows you might not be able to connect to `0.0.0.0`.  
 Try using `127.0.0.1`, `localhost`, or the computers local ip.  
 
 HRT uses a storage system to manage cookies instead of using the default 4KB session cookies to allow storing complex tag presentation rules. The location and configuration of the storage system can be set in `server.py`, near the top of the code. Configuration details can be found [here.](https://flask-session.readthedocs.io/en/latest/#configuration) By default, this uses the folder `./hrt_session`.
@@ -22,9 +22,8 @@ HRT uses a storage system to manage cookies instead of using the default 4KB ses
 ### Main
 * Text inputs for `API URL`, `API key`, `search query`, `tag(s) to append for each tagged file`. Radio button to choose to search from `inbox` or `archive`. `Search` button to submit.
 * Settings button for Tag Presentation:
-  * Rules are editable when the `Modify` button is enabled. **Rules are not _saved_ unless the `Save` button is pressed!**
+  * Rules are editable when the `Modify` button is enabled. **Rules/Preferences are not _saved_ unless the `Save` button is pressed!**
   * Rules are applied top to bottom. For example, for all other tags that don't match, eg. unnamespaced tags, place the rule at the bottom.
-  * GUI Mode - Basically a table view of rules. Gets cumbersome if you have many! Rows can be drag and dropped in this mode.
   * Plain text mode - useful for bulk importing / exporting rules. Rules must be in this format: `["class-name","Python regex","#ffffff"]` per line.
 ### Results
 Shows the number of files found for a search result. Option to choose a local tag repository to commit to for this session.
@@ -52,3 +51,6 @@ Shows the number of files found for a search result. Option to choose a local ta
 * To prevent abuse, remote tag repositories are not supported. Add the tags to a local tag repository and migrate them yourself when you are back at your Hydrus client.
 * Tag autocomplete can be added, but at this current stage it is not feasible (fetch all files' metadata, collate tags). This feature will be looked into when this [issue](https://github.com/hydrusnetwork/hydrus/issues/958) is resolved.
 * *Be sure to upvote the linked issues if you'd like for them to be added!*
+
+Based off of [koto's archive-delete web app](https://gitgud.io/koto/hydrus-archive-delete), HRT improves my tagging workflow and so I share this to improve other's tagging workflow.
+I do not take any responsibility for unintentional changes to files if this behaves unexpectedly, create an issue so that I can look into or fix the code yourself and let me know (or don't).

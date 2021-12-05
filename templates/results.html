@@ -26,13 +26,6 @@
                     <option value="{{tag}}">{{tag}}</option>
                     {%endif%}
                     {%endfor%}
-
-                    {# Disabled until petition reason is supported
-                <optgroup label="Remote">
-                    {% for tag in tagrepo["tag_repositories"] %}
-                    <option value="{{tag}}">{{tag}}</option>
-                    {%endfor%}
-                    #}
             </select>
         </div>
         <button class="btn btn-success mx-auto" style="width: 10em;" type="submit">Start</button>

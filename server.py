@@ -1,14 +1,11 @@
-from typing import cast
 from flask import Flask, request, render_template, url_for, jsonify, session, redirect
 from flask.json import tag
 from flask_session import Session
 import hydrus
-import base64
 import json
 import os
 import secrets
 import sqlite3 as sql
-import requests
 import re
 
 app = Flask(__name__)
@@ -19,6 +16,17 @@ app.secret_key = "cookiesonfire"
 app.config.from_object(__name__)
 Session(app)
 
+defaultnamespaceColors = [
+    # ["className","regex","hexColor"], apply top to bottom
+    ["character", "^character:.*$", "#00aa00"],
+    ["creator", "^creator:.*$", "#ff0000"],
+    ["meta", "^meta:.*$", "#6f6f6f"],  # default #111111 in hydrus
+    ["person", "^person:.*$", "#008000"],
+    ["series", "^series:.*$", "#d200d2"],
+    ["studio", "^studio:.*$", "#ff0000"],
+    ["namespaced", "^.*:.*$", "#72a0c1"],
+    ["unnamespaced", "^(?!.*:).*$", "#00aaff"]
+]
 
 def search_files(api_key, api_url, search_tags, inboxBool, archiveBool):
     cl = hydrus.Client(api_key, api_url)
@@ -59,19 +67,6 @@ def get_fids_from_sql():
             "SELECT file_ids FROM session WHERE session_id IS (?)", (str(session_id),))
         fids = cur.fetchone()
     return fids
-
-defaultnamespaceColors = [
-    # ["className","regex","hexColor"], apply top to bottom
-    ["character", "^character:.*$", "#00aa00"],
-    ["creator", "^creator:.*$", "#ff0000"],
-    ["meta", "^meta:.*$", "#6f6f6f"],  # default #111111
-    ["person", "^person:.*$", "#008000"],
-    ["series", "^series:.*$", "#d200d2"],
-    ["studio", "^studio:.*$", "#ff0000"],
-    ["namespaced", "^.*:.*$", "#72a0c1"],
-    ["unnamespaced", "^(?!.*:).*$", "#00aaff"]
-]
-
 
 @app.route('/index', methods=['GET', 'POST'])
 def ad():
@@ -214,7 +209,6 @@ def updatePrefs():
         session['namespaceColors'] = defaultnamespaceColors
         return jsonify({"namespaceColors": session['namespaceColors']})
     session['namespaceColors'] = data['namespaceColors']
-    # print(session['namespaceColors'])
     return jsonify({"namespaceColors": session['namespaceColors']})
 
 
