@@ -35,13 +35,16 @@ document.addEventListener('focusin', function (e) {
     e.stopImmediatePropagation();
 });
 
-//toggle list of tags sidebar (Alt)
+//toggle list of tags sidebar (localStorage.getItem("sidebarToggleKey"))
 var toggleSidebarKey = true;
 $(document).keyup(function (e) {
-    if (e.which == 18) {
-        offcanvas.toggle();
-        e.preventDefault();
-        return;
+    switch (true) {
+        case (localStorage.getItem("sidebarToggleKey") == "ctrl" && e.which == 17):
+        case (localStorage.getItem("sidebarToggleKey") == "shift" && e.which == 16):
+        case (localStorage.getItem("sidebarToggleKey") == "alt" && e.which == 18):
+            offcanvas.toggle();
+            e.preventDefault();
+            return;
     }
 });
 
@@ -123,7 +126,7 @@ $("#metadataSidebarDraggable").on("mousedown touchstart", function () {
 $(document).on("mousemove touchmove", function (e) {
     if (!isResizingSidebar) { return; }
     var currentXpos = e.clientX == undefined ? e.changedTouches[0]["clientX"] : e.clientX;
-    if ( currentXpos < windowWidthMax && currentXpos > windowWidthMin) {
+    if (currentXpos < windowWidthMax && currentXpos > windowWidthMin) {
         $('#metadataSidebar').css("width", `${$(window).width() - currentXpos}px`);
     }
 });

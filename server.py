@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, url_for, jsonify, session, redirect
+from flask import Flask, request, render_template, url_for, jsonify, session, redirect, make_response
 from flask.json import tag
 from flask_session import Session
 import hydrus
@@ -106,7 +106,7 @@ def ad():
 
         session['appendTag'] = []
         for tag in request.form.get('appendTags').split():
-            session['appendTag'].append(tag.replace('_', ' '))
+            session['appendTag'].append(tag.replace('_', ' ').lower())
 
         return render_template('results.html', tagrepo=get_services(api_key, api_url), ids=total_ids, tags=post_tags)
     except hydrus.InsufficientAccess:
@@ -161,7 +161,13 @@ def ads(id):
                     return namespace[0]
             return ""
 
-        return render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=id, total_ids=total_ids, meta=metadata, selectedService=session['selectedTagRepo'], checkModifiable=checkModifiable, matchNamespace=matchNamespace, namespaces=session['namespaceColors'])
+        # prevent browser from loading cached page to force re-fetch tags when navigating back and forth
+        response = make_response(render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=id, total_ids=total_ids, meta=metadata, selectedService=session['selectedTagRepo'], checkModifiable=checkModifiable, matchNamespace=matchNamespace, namespaces=session['namespaceColors']))
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate" # HTTP 1.1.
+        response.headers["Pragma"] = "no-cache" # HTTP 1.0.
+        response.headers["Expires"] = "0" # Proxies.
+        return response
+
     except IndexError:
         return redirect(url_for('index'))
     except KeyError:  # expired session

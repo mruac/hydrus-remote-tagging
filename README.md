@@ -40,8 +40,7 @@ Shows the number of files found for a search result. Option to choose a local ta
   * If `ENTER` or `→` is pressed with nothing in the text field, the next file is presented. Else, the text field is submitted.
   * If `ALT` or `🛈`/`X` is pressed while viewing a file, the sidebar is toggled.
 * Notes:
-  * When navigating back and forth between pages, the list of tags may not be updated correctly. Refresh the page to fix this.
-  * Tags sent has the whitespaces around trimmed and converted to lowercase.
+  * Tags sent has whitespaces trimmed and converted to lowercase.
 
 ### Notes
 * Files are tracked in current session to allow browser to navigate back and forth pages, but no further than the last presented file.

@@ -7,6 +7,12 @@ if ((localStorage.getItem('api-key') != null) && (localStorage.getItem('api-key'
     $("#api-key-input").val(localStorage.getItem('api-key'));
     $("#settings-api-key-input").val(localStorage.getItem('api-key'));
 }
+if (localStorage.getItem("sidebarToggleKey") != null){
+    $(`input[name="sidebarToggleKey"][value="${localStorage.getItem("sidebarToggleKey")}"]`).prop("checked", true);
+} else {
+    localStorage.setItem("sidebarToggleKey", "ctrl");
+    $(`input[name="sidebarToggleKey"][value="${localStorage.getItem("sidebarToggleKey")}"]`).prop("checked", true);
+}
 
 $.ajax({
     type: "POST",
@@ -106,6 +112,7 @@ $('#submitEntry').on('click', function () {
             dataType: "json",
             contentType: "application/json; charset=utf-8"
         });
+        localStorage.setItem("sidebarToggleKey", $('input[name="sidebarToggleKey"]:checked').val())
 
     }
 })
