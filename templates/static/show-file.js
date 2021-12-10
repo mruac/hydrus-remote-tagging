@@ -3,6 +3,7 @@ var next = parseInt(current) + 1
 var prev = parseInt(current) - 1
 var thres = 150
 var submitToggle = true
+var isNotShortcut = true
 
 //skip if file is not image or video
 if ($('h1').hasClass('nm-text')) {
@@ -35,16 +36,27 @@ document.addEventListener('focusin', function (e) {
     e.stopImmediatePropagation();
 });
 
+//prevent toggling sidebar if modifier keys are used in keyboard shortcut
+$(document).keydown(function (e) {
+    switch (true) {
+        case (localStorage.getItem("sidebarToggleKey") == "ctrl" && e.which != 17 && e.ctrlKey):
+        case (localStorage.getItem("sidebarToggleKey") == "shift" && e.which != 16 && e.shiftKey):
+        case (localStorage.getItem("sidebarToggleKey") == "alt" && e.which != 18 && e.altKey):
+            isNotShortcut = false;
+    }
+});
+
 //toggle list of tags sidebar (localStorage.getItem("sidebarToggleKey"))
-var toggleSidebarKey = true;
 $(document).keyup(function (e) {
     switch (true) {
         case (localStorage.getItem("sidebarToggleKey") == "ctrl" && e.which == 17):
         case (localStorage.getItem("sidebarToggleKey") == "shift" && e.which == 16):
         case (localStorage.getItem("sidebarToggleKey") == "alt" && e.which == 18):
-            offcanvas.toggle();
-            e.preventDefault();
-            return;
+            if (isNotShortcut) {
+                offcanvas.toggle();
+                e.preventDefault();
+                return;
+            } else { isNotShortcut = true; }
     }
 });
 
