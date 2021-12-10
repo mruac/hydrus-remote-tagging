@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, url_for, jsonify, session, redirect, make_response
 from flask.json import tag
 from flask_session import Session
-import hydrus
+import hydrus_api as hydrus
 import json
 import os
 import secrets
