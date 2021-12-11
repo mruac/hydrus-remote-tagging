@@ -3,6 +3,7 @@ A web interface for tagging your hydrus files.
 
 # Dependencies  
 ```
+python3.9+
 hydrus-api  
 flask
 Flask-Session
