@@ -35,17 +35,35 @@
             placeholder="Search Tags (underscores for spaces, spaces as seperator)">
         <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="appendTags"
             placeholder="Tag(s) to append for each tagged file">
-        <div class="form-check" style="width: 50%; margin: 10px">
-            <input class="form-check-input" type="radio" value="inbox" id="flexCheckDefault1" name="location" checked>
-            <label class="form-check-label" for="flexCheckDefault1">
-                Inbox
-            </label>
+        <div class="input-group mb-3" style="width: 50%; margin: 10px">
+            <label class="input-group-text" for="fileSort">Sort</label>
+            <select class="form-select" id="fileSort" name="fileSort">
+                <option disabled>File sort type (▲ / ▼)</label>
+                <option value="1">File size (smallest first/largest first)</option>
+                <option value="2">Duration (shortest first/longest first)</option>
+                <option value="3" selected>Import time (oldest first/newest first)</option>
+                <option value="4">Filetype (N/A)</option>
+                <option value="5">Random (N/A)</option>
+                <option value="6">Width (slimmest first/widest first)</option>
+                <option value="7">Height (shortest first/tallest first)</option>
+                <option value="8">Ratio (tallest first/widest first)</option>
+                <option value="9">Number of pixels (ascending/descending)</option>
+                <option value="10">Number of tags (on the current tag domain) (ascending/descending)</option>
+                <option value="11">Number of media views (ascending/descending)</option>
+                <option value="12">Total media viewtime (ascending/descending)</option>
+                <option value="13">Approximate bitrate (smallest first/largest first)</option>
+                <option value="14">Has audio (audio first/silent first)</option>
+                <option value="15">Modified time (oldest first/newest first)</option>
+                <option value="16">Framerate (slowest first/fastest first)</option>
+                <option value="17">Number of frames (smallest first/largest first)</option>
+            </select>
         </div>
-        <div class="form-check" style="width: 50%; margin: 10px">
-            <input class="form-check-input" type="radio" value="archive" id="flexCheckDefault2" name="location">
-            <label class="form-check-label" for="flexCheckDefault2">
-                Archive
-            </label>
+        <div class="input-group mb-3" style="width: 50%; margin: 10px">
+            <label class="input-group-text" for="fileOrder">Order</label>
+            <select class="form-select" id="fileOrder" name="fileOrder">
+                <option value="false" selected>Descending ▼</option>
+                <option value="true">Ascending ▲</option>
+            </select>
         </div>
         <button class="btn btn-success" style="margin: 10px" type="submit">Search</button>
     </form>
@@ -76,26 +94,34 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" >Settings</h5>
+                    <h5 class="modal-title">Settings</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <h5>Preferences</h5>
-                    <input id="settings-api-url-input" class="form-control w-100 mx-auto" style="width: 50%; margin: 10px" type="text" name="api_url" placeholder="Default API URL">
-                    <input id="settings-api-key-input" class="form-control w-100 mx-auto" style="width: 50%; margin: 10px" type="password" name="api_key" placeholder="Default API Key">
+                    <input id="settings-api-url-input" class="form-control w-100 mx-auto"
+                        style="width: 50%; margin: 10px" type="text" name="api_url" placeholder="Default API URL">
+                    <input id="settings-api-key-input" class="form-control w-100 mx-auto"
+                        style="width: 50%; margin: 10px" type="password" name="api_key" placeholder="Default API Key">
                     <hr>
-                    <h5>Sidebar toggle key</h5><div class="form-check" style="width: 50%; margin: 10px">
-                        <input class="form-check-input" type="radio" value="ctrl" id="sidebarToggleKey1" name="sidebarToggleKey">
+                    <h5>Sidebar toggle key</h5>
+                    <div class="form-check" style="width: 50%; margin: 10px">
+                        <input class="form-check-input" type="radio" value="ctrl" id="sidebarToggleKey1"
+                            name="sidebarToggleKey">
                         <label class="form-check-label" for="sidebarToggleKey1">
                             Ctrl
                         </label>
-                    </div><div class="form-check" style="width: 50%; margin: 10px">
-                        <input class="form-check-input" type="radio" value="alt" id="sidebarToggleKey2" name="sidebarToggleKey">
+                    </div>
+                    <div class="form-check" style="width: 50%; margin: 10px">
+                        <input class="form-check-input" type="radio" value="alt" id="sidebarToggleKey2"
+                            name="sidebarToggleKey">
                         <label class="form-check-label" for="sidebarToggleKey2">
                             Alt
                         </label>
-                    </div><div class="form-check" style="width: 50%; margin: 10px">
-                        <input class="form-check-input" type="radio" value="shift" id="sidebarToggleKey3" name="sidebarToggleKey">
+                    </div>
+                    <div class="form-check" style="width: 50%; margin: 10px">
+                        <input class="form-check-input" type="radio" value="shift" id="sidebarToggleKey3"
+                            name="sidebarToggleKey">
                         <label class="form-check-label" for="sidebarToggleKey3">
                             Shift
                         </label>
@@ -103,12 +129,15 @@
                     <hr>
                     <h5>Tag Presentation</h5>
                     <div class="alert alert-danger d-none" role="alert" id="entryAlert">
-                        Allowed characters in <b>class-name</b>: a-z, A-Z, 0-9, dash, underscore. Names cannot begin with a
+                        Allowed characters in <b>class-name</b>: a-z, A-Z, 0-9, dash, underscore. Names cannot begin
+                        with a
                         number or symbol.
                     </div>
-                    <div class="alert alert-danger d-none" role="alert" id="textformatAlert">Incorrect text-only format. Ensure there are no empty lines.</div>
+                    <div class="alert alert-danger d-none" role="alert" id="textformatAlert">Incorrect text-only format.
+                        Ensure there are no empty lines.</div>
                     <div class="form-floating font-monospace" id="inputText">
-                        <textarea class="form-control" id="inputTextarea" wrap="off" style="height: 20em;" disabled></textarea>
+                        <textarea class="form-control" id="inputTextarea" wrap="off" style="height: 20em;"
+                            disabled></textarea>
                         <label for="inputTextarea">["class-name","Python regex","#ffffff"] per line</label>
                     </div>
                 </div>

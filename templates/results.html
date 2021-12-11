@@ -20,10 +20,10 @@
                 class="form-select w-25" name="tagrepo">
                 <optgroup label="Local">
                     {% for tag in tagrepo["local_tags"] %}
-                    {% if tag == tagrepo["local_tags"][-1] %}
-                    <option value="{{tag}}" selected>{{tag}}</option>
+                    {% if tag["name"] == tagrepo["local_tags"][-1]["name"] %}
+                    <option value='{{tag["name"]}}' selected>{{tag["name"]}}</option>
                     {% else %}
-                    <option value="{{tag}}">{{tag}}</option>
+                    <option value='{{tag["name"]}}'>{{tag["name"]}}</option>
                     {%endif%}
                     {%endfor%}
             </select>

@@ -26,7 +26,7 @@ HRT uses a storage system to manage cookies instead of using the default 4KB ses
   * Rules are applied top to bottom. For example, for all other tags that don't match, eg. unnamespaced tags, place the rule at the bottom.
   * Plain text mode - useful for bulk importing / exporting rules. Rules must be in this format: `["class-name","Python regex","#ffffff"]` per line.
 ### Results
-Shows the number of files found for a search result. Option to choose a local tag repository to commit to for this session.
+Shows the number of files found for a search result for files in `my files` file repository. Option to choose a local tag repository to commit to for this session.
 ### Tagging page:
 * File preview fills page.
 * Sidebar:

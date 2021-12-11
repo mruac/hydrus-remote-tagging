@@ -28,21 +28,21 @@ defaultnamespaceColors = [
     ["unnamespaced", "^(?!.*:).*$", "#00aaff"]
 ]
 
-def search_files(api_key, api_url, search_tags, inboxBool, archiveBool):
+def search_files(api_key, api_url, search_tags, fileSort, fileOrder):
     cl = hydrus.Client(api_key, api_url)
-    fids = cl.search_files(search_tags, inboxBool, archiveBool)
+    fids = cl.search_files(tags=search_tags, file_service_name="my files", tag_service_name="all known tags", file_sort_asc=fileOrder, file_sort_type=fileSort)
     return fids
 
 
 def get_services(api_key, api_url):
     cl = hydrus.Client(api_key, api_url)
-    return cl.get_tag_services()
+    return cl.get_services()
 
 
-def save_session(api_key, api_url, service):
+def save_session(api_key, api_url, tags):
     session['api_key'] = api_key
     session['api_url'] = api_url
-    session['service'] = service
+    session['tags'] = tags
 
 
 def generate_session_id():
@@ -70,37 +70,31 @@ def get_fids_from_sql():
 
 @app.route('/index', methods=['GET', 'POST'])
 def ad():
-    try:
+    # try:
         if request.method == 'GET':
             return redirect(url_for('index'))
         try:
             session['session_id']
         except KeyError:
             generate_session_id()
+        
+        if request.form.getlist("fileOrder") == "true":
+            isAscending = True
+        else:
+            isAscending = False
 
         # start POST processing
         save_session(request.form.get('api_key'), request.form.get(
-            'api_url'), request.form.get('service'))
+            'api_url'), request.form.get('tags'))
         api_key = session['api_key']
         api_url = session['api_url']
-
-        if 'archive' in request.form.getlist('location'):
-            archiveBool = True
-        else:
-            archiveBool = False
-        if 'inbox' in request.form.getlist('location'):
-            inboxBool = True
-        else:
-            inboxBool = False
-
         session_id = session['session_id']
         post_tags = request.form.get('tags')
         tags = post_tags.split()
         clean_tags = []
         for tag in tags:
             clean_tags.append(tag.replace('_', ' '))
-        fids = search_files(api_key, api_url, clean_tags,
-                            inboxBool, archiveBool)
+        fids = search_files(api_key, api_url, clean_tags, int(request.form.getlist("fileSort")[0]), isAscending)
         total_ids = len(fids)
         save_sql(fids)
 
@@ -109,12 +103,12 @@ def ad():
             session['appendTag'].append(tag.replace('_', ' ').lower())
 
         return render_template('results.html', tagrepo=get_services(api_key, api_url), ids=total_ids, tags=post_tags)
-    except hydrus.InsufficientAccess:
-        return render_template('index.html', error="Insufficient access to Hydrus API", namespaces=session['namespaceColors'])
-    except hydrus.ServerError:
-        return render_template('index.html', error="Hydrus API encountered a server error", namespaces=session['namespaceColors'])
-    except hydrus.APIError:
-        return render_template('index.html', error="Hydrus API encountered a server error", namespaces=session['namespaceColors'])
+    # except hydrus.InsufficientAccess:
+    #     return render_template('index.html', error="Insufficient access to Hydrus API", namespaces=session['namespaceColors'])
+    # except hydrus.ServerError:
+    #     return render_template('index.html', error="Hydrus API encountered a server error", namespaces=session['namespaceColors'])
+    # except hydrus.APIError:
+    #     return render_template('index.html', error="Hydrus API encountered an API error", namespaces=session['namespaceColors'])
 
 
 @app.route('/show-file/<id>', methods=['GET', 'POST'])
@@ -140,7 +134,7 @@ def ads(id):
         while i < 4 and intid+i < total_ids:
             next_images.append(api_url+"/get_files/file?file_id="+str(int(fids[intid+i]))+"&Hydrus-Client-API-Access-Key="+api_key)
             i += 1
-        metadata = json.loads(json.dumps(cl.file_metadata(file_ids=[iid])[0]))
+        metadata = json.loads(json.dumps(cl.get_file_metadata(file_ids=[iid])[0]))
         session['metadata'] = metadata
         if request.method == 'POST':
             if request.form.get('tagrepo') != None:
@@ -202,7 +196,7 @@ def ajaxUpdate():
 
     listOfTags = {tag_repo: {"0": tagsToAdd, "1": tagsToDel}}
     cl = hydrus.Client(session['api_key'], session['api_url'])
-    cl.add_tags([hash], service_to_action_to_tags=listOfTags)
+    cl.add_tags([hash], service_names_to_actions_to_tags=listOfTags)
     listOfTags.update({"matches": matchedTags})
     return jsonify(listOfTags)  # updated lsit of tags
 
