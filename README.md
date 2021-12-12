@@ -21,8 +21,15 @@ HRT uses a storage system to manage cookies instead of using the default 4KB ses
 
 ## Pages:
 ### Main
-* Text inputs for `API URL`, `API key`, `search query`, `tag(s) to append for each tagged file`. Radio button to choose to search from `inbox` or `archive`. `Search` button to submit.
-* Settings button for Tag Presentation:
+* Inputs:
+  * `API URL` - URL to the Hydrus client API
+  * `API key` - Access key for the api
+  * `search query` - search for files with tags here. Space seperated & replace spaces with underscore. System predicates supported.
+  * `tag(s) to append for each tagged file` - Additional tags to add to all tagged files
+  * `Sort` - Sort found files in selected type.
+  * `Order` - Order found files in ascending or descending order.
+  * `Search` button to submit.
+* Settings for Tag Presentation:
   * Rules are editable when the `Modify` button is enabled. **Rules/Preferences are not _saved_ unless the `Save` button is pressed!**
   * Rules are applied top to bottom. For example, for all other tags that don't match, eg. unnamespaced tags, place the rule at the bottom.
   * Plain text mode - useful for bulk importing / exporting rules. Rules must be in this format: `["class-name","Python regex","#ffffff"]` per line.
