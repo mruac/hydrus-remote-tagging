@@ -17,7 +17,7 @@ var offcanvas = new bootstrap.Offcanvas(offcanvas_el, {
 })
 
 //Keep #metadataSidebar open/closed across pages
-if (sessionStorage.getItem('sidebar')) {
+if (sessionStorage.getItem('sidebar') == "true") {
     offcanvas_el.classList.add('show')
 } else {
     offcanvas_el.classList.remove('show')
@@ -25,10 +25,10 @@ if (sessionStorage.getItem('sidebar')) {
 
 
 offcanvas_el.addEventListener('hidden.bs.offcanvas', function () {
-    sessionStorage.setItem('sidebar', false);
+    sessionStorage.setItem('sidebar', "false");
 })
 offcanvas_el.addEventListener('shown.bs.offcanvas', function () {
-    sessionStorage.setItem('sidebar', true);
+    sessionStorage.setItem('sidebar', "true");
 })
 
 //ovveride Bootstrap 5's focusin eventlistener to allow text input while #metadataSidebar is open
