@@ -46,7 +46,7 @@ Shows the number of files found for a search result for files in `my files` file
   * Submitted tags are committed to the selected local tag repository for this session, or until the user initiates a new session from the main page.
   * User enters comma delimited list of tags into text field. Upon pressing `ENTER` or `→`, tags are commited/rescinded to/from the selected tag repository.
   * If `ENTER` or `→` is pressed with nothing in the text field, the next file is presented. Else, the text field is submitted.
-  * If `ALT` or `🛈`/`X` is pressed while viewing a file, the sidebar is toggled.
+  * If the sidebar toggle key (`CTRL` by default) or `🛈`/`X` is pressed while viewing a file, the sidebar's visibility is toggled.
 * Notes:
   * Tags sent has whitespaces trimmed and converted to lowercase.
 
