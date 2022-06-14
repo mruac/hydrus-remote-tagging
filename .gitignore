@@ -1,3 +1,5 @@
 hrt_session/
 __pycache__/
 session.db
+.vscode/launch.json
+*.code-workspace

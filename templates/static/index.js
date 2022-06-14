@@ -1,4 +1,16 @@
-var defaultnamespaceColors;
+var defaultNamespaceColors =
+    [
+        // ["className","regex","hexColor"], apply top to bottom
+        ["character", "^character:.*$", "#00aa00"],
+        ["creator", "^creator:.*$", "#ff0000"],
+        ["meta", "^meta:.*$", "#6f6f6f"],  // default #111111 in hydrus
+        ["person", "^person:.*$", "#008000"],
+        ["series", "^series:.*$", "#d200d2"],
+        ["studio", "^studio:.*$", "#ff0000"],
+        ["namespaced", "^.*:.*$", "#72a0c1"],
+        ["unnamespaced", "^(?!.*:).*$", "#00aaff"]
+    ];
+
 if ((localStorage.getItem('api-url') != null) && (localStorage.getItem('api-url') != "")) {
     $("#api-url-input").val(localStorage.getItem('api-url'));
     $("#settings-api-url-input").val(localStorage.getItem('api-url'));
@@ -7,47 +19,17 @@ if ((localStorage.getItem('api-key') != null) && (localStorage.getItem('api-key'
     $("#api-key-input").val(localStorage.getItem('api-key'));
     $("#settings-api-key-input").val(localStorage.getItem('api-key'));
 }
-if (localStorage.getItem("sidebarToggleKey") != null){
+if (localStorage.getItem("sidebarToggleKey") != null) {
     $(`input[name="sidebarToggleKey"][value="${localStorage.getItem("sidebarToggleKey")}"]`).prop("checked", true);
 } else {
     localStorage.setItem("sidebarToggleKey", "ctrl");
     $(`input[name="sidebarToggleKey"][value="${localStorage.getItem("sidebarToggleKey")}"]`).prop("checked", true);
 }
 
-$.ajax({
-    type: "POST",
-    url: "/updatePrefs",
-    data: `{"namespaceColors":""}`,
-    dataType: "json",
-    contentType: "application/json; charset=utf-8"
-}).done(function (response) {
-
-    var res = ``;
-    response['namespaceColors'].forEach(function (v, i) {
-        res += String.raw`${JSON.stringify(v).replace(/\\\\/g, '\\')}` + `\n`;
-    });
-    defaultnamespaceColors = res;
-});
-
-if ((localStorage.getItem('tagPresentation') != null)) {
-    //if namespaceColors exist in localStorage, send to flask session to store.
-    $.ajax({
-        type: "POST",
-        url: "/updatePrefs",
-        data: localStorage.getItem('tagPresentation'),
-        dataType: "json",
-        contentType: "application/json; charset=utf-8"
-    });
-
-    var res = ``;
-    JSON.parse(localStorage.tagPresentation)['namespaceColors'].forEach(function (v, i) {
-        res += String.raw`${JSON.stringify(v).replace(/\\\\/g, '\\')}` + `\n`;
-    });
-    $("#inputTextarea").val(res);
-} else {
-    //else load default namespaceColors from flask
-    $("#inputTextarea").val(defaultnamespaceColors);    
+if (localStorage.getItem('tagPresentation') == undefined){
+    localStorage.setItem('tagPresentation', JSON.stringify({"namespaceColors":defaultNamespaceColors}));
 }
+$("#inputTextarea").val(JSON.parse(localStorage.tagPresentation)["namespaceColors"]);
 
 
 $('#modifyMode').change(function () {
@@ -102,18 +84,9 @@ $('#submitEntry').on('click', function () {
         var tagPresentationDict = `{ "namespaceColors": [${val.replace(/\\/g, '\\\\')}] }`; //{"studio":[regex,"hex color"]}
 
         localStorage.setItem("api-url", $("#settings-api-url-input").val());
-        localStorage.setItem("api-key", $("#settings-api-key-input").val());    
+        localStorage.setItem("api-key", $("#settings-api-key-input").val());
         localStorage.setItem("tagPresentation", tagPresentationDict)
-        //send to /updatePrefs
-        $.ajax({
-            type: "POST",
-            url: "/updatePrefs",
-            data: tagPresentationDict,
-            dataType: "json",
-            contentType: "application/json; charset=utf-8"
-        });
         localStorage.setItem("sidebarToggleKey", $('input[name="sidebarToggleKey"]:checked').val())
-
     }
 })
 
