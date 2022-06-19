@@ -170,6 +170,7 @@ function initialise() {
         if (tagsSelected.length > 0) {
             deselectTags("#handylistOfTags");
             deselectTags("#listOfTags");
+            exitCopyMode();
         }
     });
 
