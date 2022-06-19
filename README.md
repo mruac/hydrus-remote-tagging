@@ -13,9 +13,7 @@ Flask-Session
 Just run `$ python server.py`  
 
 By default the server runs on http://0.0.0.0:8243, if you are on windows you might not be able to connect to `0.0.0.0`.  
-Try using `127.0.0.1`, `localhost`, or the computers local ip.  
-
-HRT uses a storage system to manage cookies instead of using the default 4KB session cookies to allow storing complex tag presentation rules. The location and configuration of the storage system can be set in `server.py`, near the top of the code. Configuration details can be found [here.](https://flask-session.readthedocs.io/en/latest/#configuration) By default, this uses the folder `./hrt_session`.
+Try using `127.0.0.1`, `localhost`, or the computers local ip.
 
 **You also might want to change the app.secret_key in the `server.py` file**
 
