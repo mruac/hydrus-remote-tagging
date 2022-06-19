@@ -12,10 +12,8 @@
 
 <body style="background: #19191b">
     {% if error %}
-    <div class="alert alert-warning">
-        <a href="#" class="close" data-dismiss="alert">
-            &times;
-        </a>
+    <div class="alert alert-warning" id="alert">
+        <a href="#" class="close" data-dismiss="alert"> &times; </a>
         <strong>Warning!</strong> {{ error }}
     </div>
     {% endif %}

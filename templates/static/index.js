@@ -26,10 +26,16 @@ if (localStorage.getItem("sidebarToggleKey") != null) {
     $(`input[name="sidebarToggleKey"][value="${localStorage.getItem("sidebarToggleKey")}"]`).prop("checked", true);
 }
 
-if (localStorage.getItem('tagPresentation') == undefined){
-    localStorage.setItem('tagPresentation', JSON.stringify({"namespaceColors":defaultNamespaceColors}));
+if (localStorage.getItem('tagPresentation') == undefined) {
+    localStorage.setItem('tagPresentation', JSON.stringify({ "namespaceColors": defaultNamespaceColors }));
 }
-$("#inputTextarea").val(JSON.parse(localStorage.tagPresentation)["namespaceColors"]);
+
+
+let res = "";
+JSON.parse(localStorage.tagPresentation)["namespaceColors"].forEach(v => {
+    res += `["${v[0]}","${v[1]}","${v[2]}"]\n`;
+});
+$("#inputTextarea").val(res);
 
 
 $('#modifyMode').change(function () {
@@ -51,7 +57,7 @@ $('#modifyMode').change(function () {
 
         //validate & disable textarea edit mode
         $("#inputTextarea").prop("disabled", true);
-        var val = $("#inputTextarea").val().replace(/\n/g, ',').replace(/\\/g, '\\\\');
+        let val = $("#inputTextarea").val().replace(/\n/g, ',').replace(/\\/g, '\\\\');
         val = val.replace(/,+$/m, "") //remove comma(s) at end of string in case last char is newline
         try {
             val = JSON.parse(`{"0":[${val}]}`)["0"]; //lazy way to parse string to array, lol
@@ -79,9 +85,9 @@ function validateName(name) {
 
 $('#submitEntry').on('click', function () {
     if (!$('#modifyMode').is(':checked')) {
-        var val = $("#inputTextarea").val().replace(/\n/g, ',');
+        let val = $("#inputTextarea").val().replace(/\n/g, ',');
         val = val.replace(/,+$/m, "") //remove comma(s) at end of string in case last char is newline    
-        var tagPresentationDict = `{ "namespaceColors": [${val.replace(/\\/g, '\\\\')}] }`; //{"studio":[regex,"hex color"]}
+        let tagPresentationDict = `{ "namespaceColors": [${val.replace(/\\/g, '\\\\')}] }`; //{"studio":[regex,"hex color"]}
 
         localStorage.setItem("api-url", $("#settings-api-url-input").val());
         localStorage.setItem("api-key", $("#settings-api-key-input").val());
@@ -90,6 +96,14 @@ $('#submitEntry').on('click', function () {
     }
 })
 
+$('#alert').on('click', function (e) {
+    $(e.currentTarget).remove();
+})
+
 $('#resetEntry').click(function () {
-    $("#inputTextarea").val(defaultnamespaceColors);
+    let res = "";
+    defaultNamespaceColors.forEach(v => {
+        res += `["${v[0]}","${v[1]}","${v[2]}"]\n`;
+    });
+    $("#inputTextarea").val(res);
 });

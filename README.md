@@ -37,23 +37,36 @@ HRT uses a storage system to manage cookies instead of using the default 4KB ses
 Shows the number of files found for a search result for files in `my files` file repository. Option to choose a local tag repository to commit to for this session.
 ### Tagging page:
 * File preview fills page.
-* Sidebar:
+* Left Sidebar (Recent / Frequent tags)
+  * Toggled by pressing `⭐` button.
+  * button toggle between recently added tags and most frequently added tags
+  * Resizable, maintains same size and display state across pages.
+
+* Right Sidebar (File metadata):
+  * Toggled by pressing metadata sidebar key (default `CTRL`) or `🛈` button.
   * Resizable, maintains same size and display state across pages.
   * Buttons to toggle the file metadata (known URLs & hash) and the sidebar.
   * Clicking on the headers except for `All Known Tags` will toggle the visibility of their contents.
   * List of tags for `All Known Tags`, where color is applied to each tag as per the rules set in tag presentation rules. Tags that are **bolded** and *italicised* indicates that the tag can be removed as they are committed to the selected local tag repository.
-* Tag input field at the bottom and a `→` button on right.
-  * Submitted tags are committed to the selected local tag repository for this session, or until the user initiates a new session from the main page.
-  * User enters comma delimited list of tags into text field. Upon pressing `ENTER` or `→`, tags are commited/rescinded to/from the selected tag repository.
-  * If `ENTER` or `→` is pressed with nothing in the text field, the next file is presented. Else, the text field is submitted.
-  * If `ALT` or `🛈`/`X` is pressed while viewing a file, the sidebar is toggled.
+* Tag input field at the bottom, and a green `→` or blue `📋` button on right.
+  * Submit mode (green `→`)
+    * Submitted tags are committed to the selected local tag repository for this session, or until the user initiates a new session from the main page.
+    * User enters comma delimited list of tags into text field. Upon pressing `ENTER` or `→`, tags are commited/rescinded to/from the selected tag repository.
+    * If `ENTER` or `→` is pressed with nothing in the text field, the next file is presented. Else, the text field is submitted.
+  * Paste mode (blue 📋)
+    * Any selected tags on visible sidebars activate this mode.
+    * Tap on any tag to select or deselect a tag.
+    * Press `ENTER` or `📋` button to paste selected tags into input field. This also exits Paste mode.
+    * Clicking anywhere in the file viewer exits Paste mode.
+    * Switching the left sidebar's mode clears any selected tag in that sidebar.
 * Notes:
   * Tags sent has whitespaces trimmed and converted to lowercase.
+  * Sidebars can be resized. Be careful not to resize over buttons when using small screens (eg. mobile).
 
 ### Notes
 * Files are tracked in current session to allow browser to navigate back and forth pages, but no further than the last presented file.
-* If `Tag(s) to append for each tagged file` is set, then all files are tagged with this if changes are made. Handy for searching and spellchecking files tagged with HRT.
-  * [Adding tagged files to a page](https://github.com/hydrusnetwork/hydrus/issues/350) in the Hydrus client is not possible via client API yet. The only option for this is via URL Import but this requires a valid url.
+* If `Tag(s) to append for each tagged file` is set, then all files are tagged with this if changes are made. Handy for searching and coming back to files tagged with HRT for future review.
+  * [Adding tagged files to a page](https://github.com/hydrusnetwork/hydrus/issues/350) in the Hydrus client is not possible via client API yet. The only option for this is via URL Import but this requires an importable url.
 * **Siblings & Parents are not supported yet.** This will be implemented when the [Client API supports it](https://github.com/hydrusnetwork/hydrus/issues/921). Until then, HRT will only show tags _as they are_ in the DB, _before_  being siblinged and parents applied.
 * To prevent abuse, remote tag repositories are not supported. Add the tags to a local tag repository and migrate them yourself when you are back at your Hydrus client.
 * Tag autocomplete can be added, but at this current stage it is not feasible (fetch all files' metadata, collate tags). This feature will be looked into when this [issue](https://github.com/hydrusnetwork/hydrus/issues/958) is resolved.

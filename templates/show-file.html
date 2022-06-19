@@ -36,7 +36,7 @@
 
 <body style="background: #19191b" class="h-100 p-0 m-0 d-flex overflow-hidden">
     <div class="d-flex flex-column absolute h-100 w-100 overflow-hidden">
-        <nav style="flex: none; z-index: 10" class="navbar navbar-expand-md navbar-dark bg-dark">
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
             <button type="button" class="btn btn-primary float-start me-auto ms-3 handySidebarToggle" id="handySidebarButton">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
                     <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
@@ -51,7 +51,7 @@
             </button>
         </nav>
         {% if image %}
-        <main class="text-center overflow-hidden m-auto mx-auto justify-content-center align-self-center">
+        <main class="d-flex align-items-center w-100 h-100 overflow-hidden m-auto justify-content-center" id="fileViewer">
             {% if meta['mime'].startswith('image') %}
             <img class="img-responsive mh-100 mw-100" src="{{ image }}">
             {% elif meta['mime'].startswith('video') %}
@@ -64,15 +64,14 @@
             {% endif %}
         </main>
 
-        <div style="z-index: 10"
-            class="mb-0 text-center w-auto d-block float-right font-weight-bold text-white bg-dark">
+        <div class=" text-center font-weight-bold text-white bg-dark">
             <p class="d-inline">{{ current_id }}/{{ total_ids }}</p>
         </div>
         <div class="page-footer bg-dark m-2 d-flex form-group">
 
             <div class="me-2 flex-grow-1">
                 <input type="text" class="form-control" id="inputTags" autofocus autocomplete="off"
-                    placeholder="Comma seperated tags, Backslash to escape">
+                    placeholder='Comma seperated tags, use \ to escape.'>
             </div>
             <button type="button" class="btn btn-success" id="submitTags">→</button>
         </div>
@@ -84,14 +83,14 @@
     <div id="handySidebarDraggable" style="width: 10px; z-index: 1; cursor: w-resize; transform: translate(50%,-50%);"
         class="position-absolute top-50 end-0 h-100"></div>
     <div class="p-2">
-        <button type="button" class="btn btn-secondary float-start" id="handyToggle">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
-                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707z"/>
-                <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/>
-                <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/>
+        <button type="button" class="btn btn-secondary float-end" id="handyToggle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-fill" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
               </svg>
         </button>
-        <button type="button" class="btn btn-primary float-end handySidebarToggle">X</button>
+        <button type="button" class="btn btn-primary float-start handySidebarToggle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+          </svg></button>
     </div>
 
     <div class="text-nowrap overflow-auto h-100">
@@ -119,7 +118,9 @@
                         d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z">
                     </path>
                 </svg></button>
-            <button type="button" class="btn btn-primary float-end metadataSidebarToggle">X</button>
+            <button type="button" class="btn btn-primary float-end metadataSidebarToggle"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+              </svg></button>
         </div>
 
         <div class="text-nowrap overflow-auto h-100">
@@ -162,6 +163,7 @@
     <script type="text/javascript">
         metadata = {{ meta | tojson }};
         currentRepo = "{{ selectedService }}";
+        repos = {{ repos | tojson }}
     </script>
 
 </body>
