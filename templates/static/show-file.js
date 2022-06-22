@@ -27,6 +27,11 @@ function initialise() {
     $("#handySidebar").height($(window).height() - $(".page-footer").outerHeight(true));
     $("#metadataSidebar").height($(window).height() - $(".page-footer").outerHeight(true));
 
+    $(window).on("resize", function () {
+        $("#handySidebar").height($(window).height() - $(".page-footer").outerHeight(true));
+        $("#metadataSidebar").height($(window).height() - $(".page-footer").outerHeight(true));
+    });
+
     //dynamically loads the namespaceColors into CSS
     let css = ``;
     JSON.parse(localStorage.tagPresentation)["namespaceColors"].forEach(function (v, i) {
