@@ -12,7 +12,7 @@ app = Flask(__name__)
 SESSION_TYPE = 'filesystem'
 SESSION_FILE_DIR = "hrt_session/"
 app._static_folder = os.path.abspath("templates/static/")
-app.secret_key = "cookiesonfire"
+app.secret_key = os.getenv('HRT_SECRET_KEY') or "cookiesonfire"
 app.config.from_object(__name__)
 Session(app)
 
