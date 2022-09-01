@@ -16,21 +16,11 @@ app.secret_key = os.getenv('HRT_SECRET_KEY') or "cookiesonfire"
 app.config.from_object(__name__)
 Session(app)
 
-defaultnamespaceColors = [
-    # ["className","regex","hexColor"], apply top to bottom
-    ["character", "^character:.*$", "#00aa00"],
-    ["creator", "^creator:.*$", "#ff0000"],
-    ["meta", "^meta:.*$", "#6f6f6f"],  # default #111111 in hydrus
-    ["person", "^person:.*$", "#008000"],
-    ["series", "^series:.*$", "#d200d2"],
-    ["studio", "^studio:.*$", "#ff0000"],
-    ["namespaced", "^.*:.*$", "#72a0c1"],
-    ["unnamespaced", "^(?!.*:).*$", "#00aaff"]
-]
 
 def search_files(api_key, api_url, search_tags, fileSort, fileOrder):
     cl = hydrus.Client(api_key, api_url)
-    fids = cl.search_files(tags=search_tags, file_service_name="my files", tag_service_name="all known tags", file_sort_asc=fileOrder, file_sort_type=fileSort)
+    fids = cl.search_files(tags=search_tags, file_service_name="my files",
+                           tag_service_name="all known tags", file_sort_asc=fileOrder, file_sort_type=fileSort)
     return fids
 
 
@@ -68,16 +58,17 @@ def get_fids_from_sql():
         fids = cur.fetchone()
     return fids
 
+
 @app.route('/index', methods=['GET', 'POST'])
 def ad():
-    # try:
+    try:
         if request.method == 'GET':
             return redirect(url_for('index'))
         try:
             session['session_id']
         except KeyError:
             generate_session_id()
-        
+
         if request.form.getlist("fileOrder") == "true":
             isAscending = True
         else:
@@ -94,7 +85,8 @@ def ad():
         clean_tags = []
         for tag in tags:
             clean_tags.append(tag.replace('_', ' '))
-        fids = search_files(api_key, api_url, clean_tags, int(request.form.getlist("fileSort")[0]), isAscending)
+        fids = search_files(api_key, api_url, clean_tags, int(
+            request.form.getlist("fileSort")[0]), isAscending)
         total_ids = len(fids)
         save_sql(fids)
 
@@ -103,12 +95,12 @@ def ad():
             session['appendTag'].append(tag.replace('_', ' ').lower())
 
         return render_template('results.html', tagrepo=get_services(api_key, api_url), ids=total_ids, tags=post_tags)
-    # except hydrus.InsufficientAccess:
-    #     return render_template('index.html', error="Insufficient access to Hydrus API", namespaces=session['namespaceColors'])
-    # except hydrus.ServerError:
-    #     return render_template('index.html', error="Hydrus API encountered a server error", namespaces=session['namespaceColors'])
-    # except hydrus.APIError:
-    #     return render_template('index.html', error="Hydrus API encountered an API error", namespaces=session['namespaceColors'])
+    except hydrus.InsufficientAccess:  # returns http://, not https://
+        return render_template('index.html', error="Insufficient access to Hydrus API")
+    except hydrus.ServerError:
+        return render_template('index.html', error="Hydrus API encountered a server error")
+    except hydrus.APIError:
+        return render_template('index.html', error="Hydrus API encountered an API error")
 
 
 @app.route('/show-file/<id>', methods=['GET', 'POST'])
@@ -132,40 +124,34 @@ def ads(id):
         next_images = []
         i = 1
         while i < 4 and intid+i < total_ids:
-            next_images.append(api_url+"/get_files/file?file_id="+str(int(fids[intid+i]))+"&Hydrus-Client-API-Access-Key="+api_key)
+            next_images.append(api_url+"/get_files/file?file_id=" +
+                               str(int(fids[intid+i]))+"&Hydrus-Client-API-Access-Key="+api_key)
             i += 1
-        metadata = json.loads(json.dumps(cl.get_file_metadata(file_ids=[iid])[0]))
+        metadata = json.loads(json.dumps(
+            cl.get_file_metadata(file_ids=[iid])[0]))
         session['metadata'] = metadata
         if request.method == 'POST':
             if request.form.get('tagrepo') != None:
                 session['selectedTagRepo'] = request.form.get('tagrepo')
-
-        def checkModifiable(tag):
-            try:
-                if tag in metadata['service_names_to_statuses_to_tags'][session['selectedTagRepo']]['0']:
-                    return True
-                else:
-                    return False
-            except:
-                return False
-
-        def matchNamespace(tag):
-            for namespace in session['namespaceColors']:
-                if re.fullmatch(namespace[1], tag):
-                    return namespace[0]
-            return ""
-
         # prevent browser from loading cached page to force re-fetch tags when navigating back and forth
-        response = make_response(render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=id, total_ids=total_ids, meta=metadata, selectedService=session['selectedTagRepo'], checkModifiable=checkModifiable, matchNamespace=matchNamespace, namespaces=session['namespaceColors']))
-        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate" # HTTP 1.1.
-        response.headers["Pragma"] = "no-cache" # HTTP 1.0.
-        response.headers["Expires"] = "0" # Proxies.
+        response = make_response(render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=id, total_ids=total_ids,
+                                                 meta=metadata, selectedService=session['selectedTagRepo'], repos=get_services(api_key, api_url)))
+        # HTTP 1.1.
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
+        response.headers["Expires"] = "0"  # Proxies.
         return response
 
     except IndexError:
-        return redirect(url_for('index'))
+        return redirect(url_for('index', err='inaccessible'))
     except KeyError:  # expired session
-        return redirect(url_for('index'))
+        return redirect(url_for('index', err='expired_query'))
+    except hydrus.MissingParameter:
+        return redirect(url_for('index', err='expired_query'))
+    except hydrus.ConnectionError:
+        return redirect(url_for('index', err='dead'))
+    except hydrus.APIError:
+        return redirect(url_for('index', err='dead'))
 
 
 @app.route('/updateTags', methods=['POST'])
@@ -187,34 +173,24 @@ def ajaxUpdate():
             session['appendTagIsSet'] = True
             for tag in session['appendTag']:
                 tagsToAdd.append(tag)
-    matchedTags = {}
-    for tag in tagsToAdd:
-        for namespace in session['namespaceColors']:
-            if re.fullmatch(namespace[1], tag):
-                matchedTags.update({tag: namespace[0]})
-                break
 
     listOfTags = {tag_repo: {"0": tagsToAdd, "1": tagsToDel}}
     cl = hydrus.Client(session['api_key'], session['api_url'])
     cl.add_tags([hash], service_names_to_actions_to_tags=listOfTags)
-    listOfTags.update({"matches": matchedTags})
+    # listOfTags.update({"matches": matchedTags})
     return jsonify(listOfTags)  # updated lsit of tags
-
-
-@app.route('/updatePrefs', methods=['POST'])
-def updatePrefs():
-    data = request.get_json()
-    if data['namespaceColors'] == "":
-        # return default namespace colors if there is no custom namespaceColors
-        session['namespaceColors'] = defaultnamespaceColors
-        return jsonify({"namespaceColors": session['namespaceColors']})
-    session['namespaceColors'] = data['namespaceColors']
-    return jsonify({"namespaceColors": session['namespaceColors']})
 
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
+    if request.args.get('err') == "inaccessible":
+        return render_template('index.html', error="Unreachable file - Please try again from the start.")
+    elif request.args.get('err') == "expired_query":
+        return render_template('index.html', error="Search query expired - Please try again.")
+    elif request.args.get('err') == "dead":
+        return render_template('index.html', error="Hydrus API offline. Please check and try again later.")
+    else:
+        return render_template('index.html')
 
 
 if __name__ == '__main__':

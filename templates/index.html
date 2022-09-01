@@ -12,10 +12,8 @@
 
 <body style="background: #19191b">
     {% if error %}
-    <div class="alert alert-warning">
-        <a href="#" class="close" data-dismiss="alert">
-            &times;
-        </a>
+    <div class="alert alert-warning" id="alert">
+        <a href="#" class="close" data-dismiss="alert"> &times; </a>
         <strong>Warning!</strong> {{ error }}
     </div>
     {% endif %}
@@ -138,7 +136,7 @@
                     <div class="form-floating font-monospace" id="inputText">
                         <textarea class="form-control" id="inputTextarea" wrap="off" style="height: 20em;"
                             disabled></textarea>
-                        <label for="inputTextarea">["class-name","Python regex","#ffffff"] per line</label>
+                        <label for="inputTextarea">["class-name","JS regex","#ffffff"] per line</label>
                     </div>
                 </div>
                 <div class="modal-footer">
