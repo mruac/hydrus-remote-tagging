@@ -32,7 +32,7 @@ Try using `127.0.0.1`, `localhost`, or the computers local ip.
 * Settings for Tag Presentation:
   * Rules are editable when the `Modify` button is enabled. **Rules/Preferences are not _saved_ unless the `Save` button is pressed!**
   * Rules are applied top to bottom. For example, for all other tags that don't match, eg. unnamespaced tags, place the rule at the bottom.
-  * Plain text mode - useful for bulk importing / exporting rules. Rules must be in this format: `["class-name","Python regex","#ffffff"]` per line.
+  * Plain text mode - useful for bulk importing / exporting rules. Rules must be in this format: `["class-name","JS regex","#ffffff"]` per line.
 ### Results
 Shows the number of files found for a search result for files in `my files` file repository. Option to choose a local tag repository to commit to for this session.
 ### Tagging page:
