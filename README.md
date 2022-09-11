@@ -10,14 +10,28 @@ Flask-Session
 ```
 
 # How to use
-## Python
-Just run `$ python server.py`  
+## Local Install
+Just run 
+```
+python server.py
+```  
 
 ## Docker
-Run `$ docker run -e HRT_SECRET_KEY=<yoursecretkey> -it $(docker build -q https://github.com/mruac/hydrus-remote-tagging)` (with your secret key filled in).
 
-By default the server runs on http://0.0.0.0:8243, if you are on windows you might not be able to connect to `0.0.0.0`.  
-Try using `127.0.0.1`, `localhost`, or the computers local ip.
+Build your Docker image named `hydrus-remote-tagging`
+```
+docker build -t hydrus-remote-tagging .\Dockerfile
+```
+
+Load the image into a container (Run the instance) and detach it from the CLI so that it runs in the background
+```
+docker run -d -p ${PORT}:8243 -e HRT_SECRET_KEY=<yoursecretkey> hydrus-remote-tagging
+```
+
+Replace `${PORT}` with your desired available port (eg. port `80` or `8080`), and `<yoursecretkey>` with your secret key for Python's Flask.
+The instance should then be accessible at `http://localhost:${PORT}`
+
+Omit the `-d` to make it run in the CLI.
 
 ## Pages:
 ### Main
