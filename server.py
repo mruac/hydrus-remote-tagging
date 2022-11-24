@@ -1,26 +1,18 @@
 from flask import Flask, request, render_template, url_for, jsonify, session, redirect, make_response
-from flask.json import tag
-from flask_session import Session
 import hydrus_api as hydrus
 import json
 import os
 import secrets
 import sqlite3 as sql
-import re
 
 app = Flask(__name__)
-SESSION_TYPE = 'filesystem'
-SESSION_FILE_DIR = "hrt_session/"
 app._static_folder = os.path.abspath("templates/static/")
 app.secret_key = os.getenv('HRT_SECRET_KEY') or "cookiesonfire"
-app.config.from_object(__name__)
-Session(app)
-
 
 def search_files(api_key, api_url, search_tags, fileSort, fileOrder):
     cl = hydrus.Client(api_key, api_url)
     fids = cl.search_files(tags=search_tags, file_service_name="my files",
-                           tag_service_name="all known tags", file_sort_asc=fileOrder, file_sort_type=fileSort)
+                           tag_service_name="all known tags", file_sort_asc=fileOrder, file_sort_type=fileSort) # FIXME: Fix the sort & order feature, it doesn't do this atm.
     return fids
 
 
@@ -155,7 +147,7 @@ def ads(id):
 
 
 @app.route('/updateTags', methods=['POST'])
-def ajaxUpdate():
+def updateTags():
     data = request.get_json()
     tagsToAdd = data['add']
     tagsToDel = data['del']
@@ -180,6 +172,11 @@ def ajaxUpdate():
     # listOfTags.update({"matches": matchedTags})
     return jsonify(listOfTags)  # updated lsit of tags
 
+@app.route('/searchTags', methods=['GET'])
+def searchTags():
+    cl = hydrus.Client(session['api_key'], session['api_url'])
+    response = cl._api_request("GET", "/add_tags/search_tags", params={"search": request.args.get('tag'), "tag_display_type": "display"}) #NOTE: create a PR to add the tag_display_type to the cl.search_tags() function
+    return response.json()["tags"];
 
 @app.route('/', methods=['GET'])
 def index():

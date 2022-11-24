@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="/static/bootstrap.min.css">
     <script src="/static/jquery-3.3.1.min.js"></script>
     <script src="/static/bootstrap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
     {% for url in next_images %}
     <link rel="preload" as="image" href={{ url }}>
     {%endfor%}
@@ -30,6 +32,35 @@
             -khtml-user-select: none;
             -webkit-user-select: none;
             user-select: none;
+        }
+
+        /* Adapted from https://codepen.io/Re-Krass/pen/EJVqQy */
+        html {
+            scrollbar-color: transparent dimgrey;
+        }
+
+        ::-webkit-scrollbar {
+            height: .5em;
+            width: .5em;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: lightgrey;
+            border-radius: 20px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: dimgrey;
+        }
+
+        #tagSuggest span{
+            margin-right: 1rem!important;
+            margin-left: 1rem!important;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -63,24 +94,44 @@
             </h1>
             {% endif %}
         </main>
-
-        <div class=" text-center font-weight-bold text-white bg-dark">
-            <p class="d-inline">{{ current_id }}/{{ total_ids }}</p>
-        </div>
-        <div class="page-footer bg-dark m-2 d-flex form-group">
-
-            <div class="me-2 flex-grow-1">
-                <input type="text" class="form-control" id="inputTags" autofocus autocomplete="off"
-                    placeholder='Comma seperated tags, use \ to escape.'>
+        <div id="page-footer">
+            <div class="text-center font-weight-bold text-white bg-dark" style="height: 1.5em;">
+                <p class=" d-inline" id="pageID">{{ current_id }}/{{ total_ids }}</p>
+                <p class= "d-none d-flex container-fluid m-0 overflow-auto" id="tagSuggest" style="overflow-x: scroll">
+                    <!-- <span>character:door</span>
+                    <span>series:minecraft</span>
+                    <span>copyright:mojang</span>
+                    <span>object</span>
+                    <span>objectophile</span>
+                    <span>objectophilia</span>
+                    <span>bedframe</span>
+                    <span>bedding</span>
+                    <span>bedroom eyes</span>
+                    <span>material:wood</span>
+                    <span>multiple eyes</span>
+                    <span>unspecified gender</span>
+                    <span>white background</span>
+                    <span>english text</span>
+                    <span>language:english</span>
+                    <span>speech bubble</span>
+                    <span>room:bedroom</span> -->
+                </p>
             </div>
-            <button type="button" class="btn btn-success" id="submitTags">→</button>
+            <div class="bg-dark m-2 d-flex form-group">
+
+                <div class="me-2 flex-grow-1">
+                    <input type="text" class="form-control" id="inputTags" autofocus autocomplete="off"
+                        placeholder='Comma seperated tags, use \ to escape.'>
+                </div>
+                <button type="button" class="btn btn-success" id="submitTags">→</button>
+            </div>
         </div>
     </div>
     {% endif %}
 
     <div class="offcanvas offcanvas-start bg-dark text-start opacity-75" data-bs-backdrop="false" id="handySidebar"
     style="width: 20%;">
-    <div id="handySidebarDraggable" style="width: 10px; z-index: 1; cursor: w-resize; transform: translate(50%,-50%);"
+    <div id="handySidebarDraggable" style="width: 10px; z-index: 1; cursor: w-resize; transform: translate(100%,-50%);"
         class="position-absolute top-50 end-0 h-100"></div>
     <div class="p-2">
         <button type="button" class="btn btn-secondary float-end" id="handyToggle">
@@ -106,7 +157,7 @@
 
     <div class="offcanvas offcanvas-end bg-dark text-start opacity-75" data-bs-backdrop="false" id="metadataSidebar"
         style="width: 20%;">
-        <div id="metadataSidebarDraggable" style="width: 10px; z-index: 1; cursor: w-resize; transform: translate(-50%,-50%);"
+        <div id="metadataSidebarDraggable" style="width: 10px; z-index: 1; cursor: w-resize; transform: translate(-100%,-50%);"
             class="position-absolute top-50 start-0 h-100"></div>
         <div class="p-2"><button type="button" class="btn btn-secondary float-start" data-bs-toggle="collapse"
                 data-bs-target="#file_metadata"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -130,7 +181,8 @@
                         <button type="button"
                             class="bg-dark text-light border-muted list-group-item list-group-item-action border-0 p-0 collapsed"
                             data-bs-toggle="collapse" data-bs-target="#file_known_urls" aria-expanded="false">
-                            <h5 class="font-weight-bold">Known Urls</h5>
+                            <h5 class="font-weight-bold">Known Urls</h5> 
+                            <!-- FIXME: "Known Urls" and "Hash" no longer collapse after being opened -->
                         </button>
                         <div id="file_known_urls" class="collapse">
                             {% for url in meta["known_urls"] %}

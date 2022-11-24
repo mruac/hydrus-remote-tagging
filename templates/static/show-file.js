@@ -1,12 +1,23 @@
-var current = location.href.split('/')[4].replace(/\?.*$/, '');
-var next = parseInt(current) + 1;
-var prev = parseInt(current) - 1;
-var thres = 150
-var MAXhandyTags = 50;
-var submitToggle = true;
-var isNotShortcut = true;
-var frequentTagsMap = {}, historyTags = [], offcanvas_metadata_el, offcanvas_metadata, offcanvas_handy_el, offcanvas_handy;
-var tagsSelected = [];
+var current = location.href.split('/')[4].replace(/\?.*$/, ''),
+    next = parseInt(current) + 1,
+    prev = parseInt(current) - 1,
+    MAXhandyTags = 50,
+    submitToggle = true,
+    suggestTagMode = false,
+    selectTagMode = false,
+    isNotShortcut = true,
+    frequentTagsMap = {},
+    historyTags = [],
+    offcanvas_metadata_el,
+    offcanvas_metadata,
+    offcanvas_handy_el,
+    offcanvas_handy,
+    tagsSelected = [],
+    enteredTags = "",
+    g_requests = {},
+    g_timers = {},
+    g_caretLocation = 0,
+    g_currentInputTag = "";
 
 function initialise() {
     //skip if file is not image or video
@@ -24,12 +35,12 @@ function initialise() {
         metadata["service_names_to_statuses_to_tags"][currentRepo]["2"] = [];
     }
 
-    $("#handySidebar").height($(window).height() - $(".page-footer").outerHeight(true));
-    $("#metadataSidebar").height($(window).height() - $(".page-footer").outerHeight(true));
+    $("#handySidebar").height($(window).height() - $("#page-footer").outerHeight(true));
+    $("#metadataSidebar").height($(window).height() - $("#page-footer").outerHeight(true));
 
     $(window).on("resize", function () {
-        $("#handySidebar").height($(window).height() - $(".page-footer").outerHeight(true));
-        $("#metadataSidebar").height($(window).height() - $(".page-footer").outerHeight(true));
+        $("#handySidebar").height($(window).height() - $("#page-footer").outerHeight(true));
+        $("#metadataSidebar").height($(window).height() - $("#page-footer").outerHeight(true));
     });
 
     //dynamically loads the namespaceColors into CSS
@@ -99,7 +110,27 @@ function initialise() {
 
     //prevent toggling sidebar if modifier keys are used in keyboard shortcut
     $(document).keydown(function (e) {
-        switch (true) {
+        switch (e.which) {
+            case 17 && (localStorage.getItem("sidebarToggleKey") == "ctrl"):
+            case 16 && (localStorage.getItem("sidebarToggleKey") == "shift"):
+            case 18 && (localStorage.getItem("sidebarToggleKey") == "alt"):
+                if (isNotShortcut) { e.preventDefault(); }
+                break;
+            case 38: //up pressed from #inputTags is foccused (being typed in)
+                // if ($("#inputTags").is(':focus') && suggestTagMode && $(e.target).is("#inputTags")) { e.preventDefault(); }
+                e.preventDefault();
+                break;
+            case 40: //down
+                // if(!suggestTagMode){e.preventDefault(); }
+                e.preventDefault();
+                break;
+            case 37: //left
+            case 39: //right
+                if (suggestTagMode) {
+                    e.preventDefault();
+                }
+                break;
+            default:
             case (localStorage.getItem("sidebarToggleKey") == "ctrl" && e.which != 17 && e.ctrlKey):
             case (localStorage.getItem("sidebarToggleKey") == "shift" && e.which != 16 && e.shiftKey):
             case (localStorage.getItem("sidebarToggleKey") == "alt" && e.which != 18 && e.altKey):
@@ -110,17 +141,115 @@ function initialise() {
     //toggle sidebars (localStorage.getItem("sidebarToggleKey"));
     //metadataSidebar
     $(document).keyup(function (e) {
-        switch (true) {
-            case (localStorage.getItem("sidebarToggleKey") == "ctrl" && e.which == 17):
-            case (localStorage.getItem("sidebarToggleKey") == "shift" && e.which == 16):
-            case (localStorage.getItem("sidebarToggleKey") == "alt" && e.which == 18):
+        switch (e.which) {
+
+            case 17 && (localStorage.getItem("sidebarToggleKey") == "ctrl"):
+            case 16 && (localStorage.getItem("sidebarToggleKey") == "shift"):
+            case 18 && (localStorage.getItem("sidebarToggleKey") == "alt"):
                 if (isNotShortcut) {
                     offcanvas_metadata.toggle();
                     e.preventDefault();
                     return;
                 } else { isNotShortcut = true; }
+                break;
+
+            case 13: //Submit #inputTags (Enter);
+                if (submitToggle) { //check if submitToggle allows you to press enter. It is set to false when there is a pending AJAX request to prevent multiple unintended reuqests.
+                    onSubmitTags();
+                }
+                break;
+
+
+            case 38: //up
+                e.preventDefault();
+                //enter suggest tag mode
+                if ($("#inputTags").is(':focus') && !suggestTagMode && $(e.target).is("#inputTags")) {
+                    exitCopyMode();
+                    suggestTagMode = true;
+                    enableSuggestTags(true);
+                    selectTag($("#tagSuggest").children()[0]);
+                }
+                break;
+            case 40: //down
+                e.preventDefault();
+                //exit suggest tag mode
+                if (suggestTagMode) {
+                    suggestTagMode = false;
+                    exitCopyMode();
+                }
+                break;
+            case 37: //left
+            case 39: //right
+                if (suggestTagMode && selectTagMode) {
+                    e.preventDefault();
+                    //if only ONE tag selected && it is in suggestTags, nav left or right depending on the right/left key pressed.
+                    //else don't do anything as user may be in copy + paste mode
+                    let i = 0;
+                    let els = $("#tagSuggest").children();
+                    for (i; i < els.length; i++) {
+                        if (els[i] === tagsSelected[0]) { break; }
+                    }
+                    deselectTag(els[i]);
+                    if (e.which === 37) {
+                        i -= 1;
+                    } else if (e.which === 39) {
+                        i += 1;
+                    }
+                    if (i < 0) { i = els.length + i; }
+                    else if (i > els.length - 1) { i = i - els.length }
+                    selectTag(els[i]);
+                    ensureInView($("#tagSuggest")[0], els[i]);
+                } else if ($("#tagSuggest").is(":visible")) {
+                    if ($("#inputTags").get(0).selectionStart != g_caretLocation) {
+                        let inputTags = $("#inputTags").val();
+                        let nearestBeforeCommaLeft = findBeforeCommaIndex(inputTags, g_caretLocation, false);
+                        let nearestBeforeCommaRight = findBeforeCommaIndex(inputTags, g_caretLocation, true);
+                        let tag = inputTags.slice(nearestBeforeCommaLeft, nearestBeforeCommaRight).trim().toLowerCase();
+                        if (tag != g_currentInputTag) {
+                            g_currentInputTag = tag;
+                            exitCopyMode();
+                            suggestTagMode = false;
+                            suggestAutocompleteTag();
+                        }
+
+                    }
+                }
+                g_caretLocation = $("#inputTags").get(0).selectionStart;
+                break;
+            default: //check if the inputTags has changed (to include foreign chars & alphanumeric chars)
+                if ($("#inputTags").is(':focus')) {
+                    if ($("#inputTags").val().length != enteredTags.length) {
+                        while (Object.keys(g_timers).length > 0) { clearTimeout(g_timers[Object.keys(g_timers)[0]]); delete g_timers[Object.keys(g_timers)[0]]; }
+                        while (Object.keys(g_requests).length > 0) { g_requests[Object.keys(g_requests)[0]].abort(); delete g_requests[Object.keys(g_requests)[0]]; } //abort previous ajax requests to prevent .done/fail functions from being executed late
+                        exitCopyMode();
+                        suggestTagMode = false;
+                        suggestAutocompleteTag();
+                        //update enteredTags for the next change.
+                        enteredTags = $("#inputTags").val();
+                    }
+                }
+                g_caretLocation = $("#inputTags").get(0).selectionStart;
+
+                break;
         }
     });
+
+    $("#inputTags").on("click", () => {
+        g_caretLocation = $("#inputTags").get(0).selectionStart;
+        //get current tag
+        let inputTags = $("#inputTags").val();
+        let nearestBeforeCommaLeft = findBeforeCommaIndex(inputTags, g_caretLocation, false);
+        let nearestBeforeCommaRight = findBeforeCommaIndex(inputTags, g_caretLocation, true);
+        let tag = inputTags.slice(nearestBeforeCommaLeft, nearestBeforeCommaRight).trim().toLowerCase();
+
+        if (tag != g_currentInputTag) {
+            g_currentInputTag = tag;
+            exitCopyMode();
+            suggestTagMode = false;
+            suggestAutocompleteTag();
+        }
+    })
+
     $(".metadataSidebarToggle").on("click", function () {
         offcanvas_metadata.toggle();
     });
@@ -128,13 +257,6 @@ function initialise() {
     //handySidebar
     $(".handySidebarToggle").on("click", function () {
         offcanvas_handy.toggle();
-    });
-
-    //Submit #inputTags (Enter);
-    $(document).keyup(function (e) {
-        if (e.which == 13 && submitToggle) {
-            onSubmitTags();
-        }
     });
 
     $("#submitTags").click(function () {
@@ -401,7 +523,8 @@ function sendTags(tags) {
     console.log(data);
     recordTags(data["add"]);
 
-    $.ajax({
+    const id = (Math.random() * 100000000 | 0).toString();
+    g_requests[id] = $.ajax({
         type: "POST",
         url: "/updateTags",
         data: JSON.stringify(data),
@@ -425,7 +548,8 @@ function sendTags(tags) {
             $("#inputTags").prop('disabled', false).removeClass("bg-danger");
             $("#submitTags").prop('disabled', false).removeClass("bg-danger");
         }, 1000);
-    });
+    }).then(() => { delete g_requests[id] });
+
 };
 
 function updatefrequentTags() {
@@ -496,7 +620,6 @@ function addSelectListener(el) {
     $(el).on("click", function (e) {
         if ($(e.target).css("background-color") == 'rgba(0, 0, 0, 0)') {
             selectTag(e.currentTarget);
-            switchToCopyTagMode();
         } else {
             deselectTag(e.currentTarget);
             if (tagsSelected.length == 0) { exitCopyMode(); }
@@ -505,10 +628,13 @@ function addSelectListener(el) {
 }
 
 function selectTag(tagEl) {
+    if (tagEl === undefined) { return; }
+    selectTagMode = true;
     tagsSelected.push(tagEl);
     let color = rgba2hex($(tagEl).css("color"));
     $(tagEl).css("color", pickTextColorBasedOnBgColorSimple(color));
     $(tagEl).css("background-color", color);
+    switchToCopyTagMode();
 }
 
 function deselectTag(tagEl) {
@@ -551,14 +677,37 @@ function switchToCopyTagMode() {
 }
 
 function exitCopyMode() {
+    selectTagMode = false;
     deselectTags("#handylistOfTags");
     deselectTags("#listOfTags");
+    deselectTags("#tagSuggest");
+    // enableSuggestTags(false);
+    tagsSelected = [];
     $("#submitTags").removeClass("btn-primary").addClass("btn-success").html(`→`);
 }
 
 function onSubmitTags() {
     let tags = $("#inputTags").val();
-    if (tagsSelected.length > 0) {
+    if (tagsSelected.length === 1 && $(tagsSelected[0]).parent()[0] === $("#tagSuggest")[0]) {
+        console.log("suggestTagMode: " + suggestTagMode);
+        //Submit selected suggested tag
+        let tag = $(tagsSelected[0]).text().replaceAll("\\", "\\\\").replaceAll(",", "\\,");
+
+        let caretLocation = $("#inputTags").get(0).selectionStart;
+
+        //"look" around the caretLocation to determine which tag is currently being typed
+        //search for the nearest comma on the left/right side, excluding escaped commas
+        let inputTags = $("#inputTags").val();
+        let nearestBeforeCommaLeft = findBeforeCommaIndex(inputTags, caretLocation, false);
+        let nearestBeforeCommaRight = findBeforeCommaIndex(inputTags, caretLocation, true);
+        console.log({ "inputField": inputTags, "selectedTag": tag, "caretLocation": caretLocation, "left": nearestBeforeCommaLeft, "right": nearestBeforeCommaRight, "caret": inputTags.slice(0, caretLocation) + "^" + inputTags.slice(caretLocation, inputTags.length) });
+        $("#inputTags").val(`${inputTags.slice(0, nearestBeforeCommaLeft)} ${tag}, ${inputTags.slice(nearestBeforeCommaRight, inputTags.length - 1)}`);
+        $("#inputTags").get(0).selectionStart = nearestBeforeCommaLeft + tag.length + 2;
+        $("#inputTags").get(0).selectionEnd = nearestBeforeCommaLeft + tag.length + 2;
+        suggestTagMode = false;
+        enableSuggestTags(false);
+        exitCopyMode();
+    } else if (tagsSelected.length > 0 && selectTagMode) {
         let res = ", ";
         tagsSelected.forEach(function (v) {
             res += v.textContent.replaceAll("\\", "\\\\").replaceAll(",", "\\,"); //escape escape char and delimiter
@@ -569,9 +718,164 @@ function onSubmitTags() {
     } else if (tags == "") {
         toNextFile();
     } else {
+        enableSuggestTags(false);
+        exitCopyMode();
         sendTags(tags);
     }
 
+}
+
+function suggestAutocompleteTag() { //$("#inputTags").val() - called each time a new character is typed
+    //list of Suggested tags is not selected by default, user has to press up/down to select a tag and press Enter, or mobile user can tap to select & enter.
+    //list of Suggest tags is hidden when focus is lost from #inputTags. User has to start typing again (not delete/backspace) to initiate tagSuggestion again.
+
+    // see fixme where it requests to change from using arrays to dictionary objects & implements a self-destroying / cancelling method using a unique id.
+    //2000ms wait before sending ajax, cancel wait if user types again. prevents sending ajax on every keystroke while user is actively typing
+    //cancel ajax Promise if user types again before it is resolved.
+    const id = (Math.random() * 100000000 | 0).toString();
+
+    g_timers[id] = setTimeout(() => {
+        enableSuggestTags(false);
+        exitCopyMode();
+
+        //use caretLocation to determine which tag is being typed in the comma seperated list of tags
+        let caretLocation = -1;
+        if ($("#inputTags").get(0).selectionStart === $("#inputTags").get(0).selectionEnd) {
+            caretLocation = $("#inputTags").get(0).selectionStart;
+        }
+
+        //"look" around the caretLocation to determine which tag is currently being typed
+        //search for the nearest comma on the left/right side, excluding escaped commas
+        let inputTags = $("#inputTags").val();
+        let nearestBeforeCommaLeft = findBeforeCommaIndex(inputTags, caretLocation, false);
+        let nearestBeforeCommaRight = findBeforeCommaIndex(inputTags, caretLocation, true);
+        let tag = inputTags.slice(nearestBeforeCommaLeft, nearestBeforeCommaRight).trim().toLowerCase();
+        console.log({ "tag": tag, "caretLocation": caretLocation, "commaLeft": nearestBeforeCommaLeft, "commaRight": nearestBeforeCommaRight });
+
+        if (
+            tag.length < 3 || //don't search for tags less than 4 chars
+            tag.match(/.*?:(.*)/)?.[1].length < 3 //don't search for namespace tags with no value
+        ) {
+            return;
+        }
+        /*
+        FIXME: Prevent user from doing these when there are pending requests:
+            - Selecting tags in suggestedTags
+            - Submitting tags to the selectedTagRepo
+
+        Solution: use a dictionary object instead of an array to manage requests. eg:
+        //Checks if there are any pending requests.
+        if (Object.keys(requests).length > 0){console.log("there are pending requests!")}
+
+        const id = (Math.random() * 100000000 | 0).toString();
+        reqs[id] = new Promise((resolve, reject) => {
+            setTimeout(() => {resolve("Success!"); }, 10000);
+        }).then((response) => {
+            console.log(`deleting ${id}`)
+            delete reqs[id];
+        })
+        */
+
+/*         requests.push(
+            $.ajax({
+                type: "GET",
+                url: "/searchTags",
+                data: { "tag": tag },
+                dataType: "json",
+                contentType: "application/json;charset=utf-8"
+            }).done(function (response) {
+                enableSuggestTags(true);
+                updateSuggestTags(response);
+            }).fail(function () {
+                enableSuggestTags(false);
+                exitCopyMode();
+            })
+        ); */
+
+        //TODO: Make searchTags / suggestTags non blocking for those with shitty internet (eg. in tunnel)
+        
+        const id = (Math.random() * 100000000 | 0).toString();
+        g_requests[id] = $.ajax({
+                type: "GET",
+                url: "/searchTags",
+                data: { "tag": tag },
+                dataType: "json",
+                contentType: "application/json;charset=utf-8"
+            }).done(function (response) {
+                enableSuggestTags(true);
+                updateSuggestTags(response);
+            }).fail(function () {
+                enableSuggestTags(false);
+                exitCopyMode();
+            }).then(() => {delete g_requests[id]});
+        
+
+    }, 500);
+
+    return;
+
+
+
+    function updateSuggestTags(tags) {
+        let el = $("#tagSuggest");
+        el.children().each(function (i, v) { v.remove(); });
+        tags.forEach(function (tag) {
+            let tagel = $(`<span class="${findnamespaceColor(tag.value)}">${tag.value}</span>`);
+            addSelectListener(tagel);
+            el.append($(tagel));
+        });
+    }
+
+}
+
+//caretLocation: 28, commaLeft: 29, commaRight: 27
+//red line, medium:green, pink, series:pokémon red,, green, , blue & yellow 
+function findBeforeCommaIndex(string, caret, goRight) {
+    let i = caret;
+    if (string.at(i) === ',' && string.at(i - 1) != '\\') { i--; }
+    if (goRight) {
+        if (string.at(i) === ',' && string.at(i - 1) != '\\') { return i + 1; }
+        for (i; i < string.length; i++) {
+            if (string.at(i) === ',') {
+                if (string.at(i - 1) != '\\') { return i; } else { continue; }
+            }
+        }
+        return string.length;
+    } else { //go left
+        if (string.at(i) === ',' && string.at(i - 1) != '\\') { return i + 1; }
+        for (i; i > -1; i--) {
+            //in the first iteration of this for loop, if i === ',', then continue
+            if (string.at(i) === ',') {
+                if (string.at(i - 1) != '\\') { return i + 1; } else { continue; }
+            }
+        }
+        return 0;
+    }
+}
+
+function enableSuggestTags(enable = $("#tagSuggest").is(":visible")) {
+    if (enable) {
+        $("#pageID").addClass("d-none");
+        $("#tagSuggest").removeClass("d-none");
+    } else {
+        $("#tagSuggest").addClass("d-none");
+        $("#pageID").removeClass("d-none");
+        suggestTagMode = false;
+    }
+    return;
+}
+
+function ensureInView(container, element) {
+    //Check if out of view
+    let eRightOutsideView = element.getBoundingClientRect().right - container.offsetWidth;
+    let eLeftOutsideView = element.getBoundingClientRect().left;
+
+    if (eRightOutsideView > 0) {
+        container.scrollLeft += eRightOutsideView + 10;
+    }
+    else if (eLeftOutsideView < 0) {
+        container.scrollLeft += (eLeftOutsideView - 10);
+    }
 }
 
 $(document).ready(function () {
