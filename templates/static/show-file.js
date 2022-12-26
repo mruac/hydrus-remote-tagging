@@ -19,21 +19,54 @@ var current = location.href.split('/')[4].replace(/\?.*$/, ''),
     g_caretLocation = 0,
     g_currentInputTag = "";
 
+const currentRepo = repos["local_tags"].find((v) => { return v["service_key"] === currentRepoKey });
+const g_crTags = (() => {
+
+    let res = metadata?.["service_names_to_statuses_to_tags"]?.[currentRepo["name"]]; //old file metadata tags structure
+    if (apiVersion > 34) {
+        res = metadata?.["tags"]?.[currentRepo["service_key"]]["storage_tags"]; //new file metadata tags structure
+    }
+
+    if (res === undefined) {
+        nbnb
+        res = { "0": [], "2": [] }
+    }
+
+    if (res["0"] === undefined) {
+        res["0"] = [];
+    }
+    if (res["2"] === undefined) {
+        res["2"] = [];
+    }
+
+    return res;
+})();
+
+const g_akTags = (() => { //metadata['service_names_to_statuses_to_tags']["all known tags"]
+    let res = metadata?.['service_names_to_statuses_to_tags']?.["all known tags"]; //old file metadata tags structure
+    if (apiVersion > 34) {
+        res = metadata?.["tags"]?.[repos['all_known_tags'][0]['service_key']]["storage_tags"]; //new file metadata tags structure
+    }
+
+    if (res === undefined) {
+        res = { "0": [], "2": [] }
+    }
+
+    if (res['0'] == undefined) {
+        res['0'] = [];
+    }
+    if (res['2'] == undefined) {
+        res['2'] = [];
+    }
+    return res;
+})();
+
 function initialise() {
     //skip if file is not image or video
     if ($('h1').hasClass('nm-text')) {
         toNextFile();
     }
 
-    if (metadata["service_names_to_statuses_to_tags"][currentRepo] == undefined) {
-        metadata["service_names_to_statuses_to_tags"][currentRepo] = { "0": [], "2": [] }
-    }
-    if (metadata["service_names_to_statuses_to_tags"][currentRepo]["0"] == undefined) {
-        metadata["service_names_to_statuses_to_tags"][currentRepo]["0"] = [];
-    }
-    if (metadata["service_names_to_statuses_to_tags"][currentRepo]["2"] == undefined) {
-        metadata["service_names_to_statuses_to_tags"][currentRepo]["2"] = [];
-    }
 
     $("#handySidebar").height($(window).height() - $("#page-footer").outerHeight(true));
     $("#metadataSidebar").height($(window).height() - $("#page-footer").outerHeight(true));
@@ -163,7 +196,7 @@ function initialise() {
             case 38: //up
                 e.preventDefault();
                 //enter suggest tag mode
-                if ($("#inputTags").is(':focus') && !suggestTagMode && $(e.target).is("#inputTags")) {
+                if ($("#inputTags").is(':focus') && !suggestTagMode && $(e.target).is("#inputTags") && $("#tagSuggest span").length > 0) {
                     exitCopyMode();
                     suggestTagMode = true;
                     enableSuggestTags(true);
@@ -301,8 +334,8 @@ function initialise() {
         }
     });
 
-    if (metadata['service_names_to_statuses_to_tags']['all known tags']['0'] != undefined) {
-        loadTags("#listOfTags", metadata['service_names_to_statuses_to_tags']["all known tags"]['0']);
+    if (g_akTags['0'] != undefined) {
+        loadTags("#listOfTags", g_akTags['0']);
     }
     if (sessionStorage.getItem("frequentORhistory") == "true") {
         loadFrequentTags();
@@ -353,7 +386,7 @@ function removeTag(tag) {
     let foundTagEl = findTagEl("#listOfTags", tag);
     if (foundTagEl != undefined) {
         $(foundTagEl).removeClass("modifiable");
-        if (metadata['service_names_to_statuses_to_tags']["all known tags"]['0'].indexOf(tag) == -1) {
+        if (g_akTags['0'].indexOf(tag) == -1) {
             $(foundTagEl).remove();
         }
     }
@@ -463,16 +496,11 @@ function sendTags(tags) {
     $("#submitTags").prop('disabled', true);
     submitToggle = false;
 
-    let CRcurrentTags = metadata["service_names_to_statuses_to_tags"][currentRepo]["0"];
-    let CRdeletedTags = metadata["service_names_to_statuses_to_tags"][currentRepo]["2"];
-    if (metadata['service_names_to_statuses_to_tags']["all known tags"]['0'] == undefined) {
-        metadata['service_names_to_statuses_to_tags']["all known tags"]['0'] = [];
-    }
-    if (metadata['service_names_to_statuses_to_tags']["all known tags"]['2'] == undefined) {
-        metadata['service_names_to_statuses_to_tags']["all known tags"]['2'] = [];
-    }
-    let AKcurrentTags = metadata['service_names_to_statuses_to_tags']["all known tags"]['0'];
-    let AKdeletedTags = metadata["service_names_to_statuses_to_tags"]["all known tags"]["2"];
+    let CRcurrentTags = g_crTags["0"];
+    let CRdeletedTags = g_crTags["2"];
+
+    let AKcurrentTags = g_akTags["0"];
+    let AKdeletedTags = g_akTags["2"];
 
     let data = {
         "add": [],
@@ -490,15 +518,22 @@ function sendTags(tags) {
         if (tag == "") { return; }
         if (CRcurrentTags.indexOf(tag) > -1) {
             //check if tags exists in other repos before removing from All Known tags
-            let res = repos['local_tags'].some(function (v) {
-                if (metadata["service_names_to_statuses_to_tags"][v.name] != undefined) {
-                    if (metadata["service_names_to_statuses_to_tags"][v.name]["0"] != undefined) {
-                        if (metadata["service_names_to_statuses_to_tags"][v.name]["0"].indexOf(tag) > -1) {
-                            return true;
+            const res = (() => {
+                if (apiVersion > 34) {
+                    return repos['local_tags'].some(function (v) {
+                        if (metadata["tags"]?.[v.service_key]?.['storage_tags']["0"] != undefined) {
+                            if (metadata["tags"][v.service_key]['storage_tags']["0"].indexOf(tag) > -1) { return true; }
                         }
-                    }
+                    });
+                } else {
+                    return repos['local_tags'].some(function (v) {
+                        if (metadata["service_names_to_statuses_to_tags"]?.[v.name]?.["0"] != undefined) {
+                            if (metadata["service_names_to_statuses_to_tags"][v.name]["0"].indexOf(tag) > -1) { return true; }
+                        }
+                    });
                 }
-            });
+            })();
+
             if (res) {
                 AKdeletedTags.push(tag);
                 AKcurrentTags.splice(AKcurrentTags.indexOf(tag), 1);
@@ -536,8 +571,15 @@ function sendTags(tags) {
         $("#submitTags").prop('disabled', false);
         submitToggle = true;
         console.log(response);
-        let addTags = response[currentRepo]["0"];
-        let delTags = response[currentRepo]["1"];
+        let addTags = {};
+        let delTags = {};
+        if (apiVersion > 34) {
+            addTags = response[currentRepo["service_key"]]["0"];
+            delTags = response[currentRepo["service_key"]]["1"];
+        } else {
+            addTags = response[currentRepo["name"]]["0"];
+            delTags = response[currentRepo["name"]]["1"];
+        }
         addTags.forEach(tag => { insertTag(tag) });
         delTags.forEach(tag => { removeTag(tag) });
     }).fail(function () {
@@ -580,7 +622,7 @@ function findnamespaceColor(tag) { //matches namespaceColors to a tag
 }
 
 function checkModifiable(tag) {
-    if (metadata['service_names_to_statuses_to_tags'][currentRepo]['0'].indexOf(tag) > -1) { return "modifiable" }
+    if (g_crTags['0'].indexOf(tag) > -1) { return "modifiable" }
     return ""
 }
 
@@ -631,8 +673,8 @@ function selectTag(tagEl) {
     if (tagEl === undefined) { return; }
     selectTagMode = true;
     tagsSelected.push(tagEl);
-    let color = rgba2hex($(tagEl).css("color"));
-    $(tagEl).css("color", pickTextColorBasedOnBgColorSimple(color));
+    let color = $(tagEl).css("color");
+    $(tagEl).css("color", pickTextColorBasedOnBgColor(color));
     $(tagEl).css("background-color", color);
     switchToCopyTagMode();
 }
@@ -654,17 +696,18 @@ function deselectTags(element) {
     });
 }
 
-function pickTextColorBasedOnBgColorSimple(bgColor) { //https://stackoverflow.com/a/41491220/5791312
-    let color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
-    let r = parseInt(color.substring(0, 2), 16); // hexToR
-    let g = parseInt(color.substring(2, 4), 16); // hexToG
-    let b = parseInt(color.substring(4, 6), 16); // hexToB
-    return (((r * 0.299) + (g * 0.587) + (b * 0.114)) > 186) ?
-        '#FFFFFF' : '#000000';
-}
+function pickTextColorBasedOnBgColor(rgbString){ //https://stackoverflow.com/a/11868398/5791312
+    const colorArr = rgbString.slice(
+        rgbString.indexOf("(") + 1, 
+        rgbString.indexOf(")")
+    ).split(", ");
 
-//https://stackoverflow.com/a/3627747/5791312
-function rgba2hex(rgba) { return `#${rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+\.{0,1}\d*))?\)$/).slice(1).map((n, i) => (i === 3 ? Math.round(parseFloat(n) * 255) : parseFloat(n)).toString(16).padStart(2, '0').replace('NaN', '')).join('')}` }
+    let r = parseInt(colorArr[0]);
+    let g = parseInt(colorArr[1]);
+    let b = parseInt(colorArr[2]);
+    let yiq = ((r*299)+(g*587)+(b*114))/1000;
+    return (yiq >= 128) ? '#000000' : '#FFFFFF';
+}
 
 function switchToCopyTagMode() {
     if (tagsSelected.length > 0) {
@@ -758,57 +801,23 @@ function suggestAutocompleteTag() { //$("#inputTags").val() - called each time a
         ) {
             return;
         }
-        /*
-        FIXME: Prevent user from doing these when there are pending requests:
-            - Selecting tags in suggestedTags
-            - Submitting tags to the selectedTagRepo
 
-        Solution: use a dictionary object instead of an array to manage requests. eg:
-        //Checks if there are any pending requests.
-        if (Object.keys(requests).length > 0){console.log("there are pending requests!")}
-
-        const id = (Math.random() * 100000000 | 0).toString();
-        reqs[id] = new Promise((resolve, reject) => {
-            setTimeout(() => {resolve("Success!"); }, 10000);
-        }).then((response) => {
-            console.log(`deleting ${id}`)
-            delete reqs[id];
-        })
-        */
-
-/*         requests.push(
-            $.ajax({
-                type: "GET",
-                url: "/searchTags",
-                data: { "tag": tag },
-                dataType: "json",
-                contentType: "application/json;charset=utf-8"
-            }).done(function (response) {
-                enableSuggestTags(true);
-                updateSuggestTags(response);
-            }).fail(function () {
-                enableSuggestTags(false);
-                exitCopyMode();
-            })
-        ); */
-
-        //TODO: Make searchTags / suggestTags non blocking for those with shitty internet (eg. in tunnel)
-        
         const id = (Math.random() * 100000000 | 0).toString();
         g_requests[id] = $.ajax({
-                type: "GET",
-                url: "/searchTags",
-                data: { "tag": tag },
-                dataType: "json",
-                contentType: "application/json;charset=utf-8"
-            }).done(function (response) {
+            type: "GET",
+            url: "/searchTags",
+            data: { "tag": tag },
+            dataType: "json",
+            contentType: "application/json;charset=utf-8"
+        }).done(function (response) {
+            if (response.length > 0) {
                 enableSuggestTags(true);
-                updateSuggestTags(response);
-            }).fail(function () {
-                enableSuggestTags(false);
-                exitCopyMode();
-            }).then(() => {delete g_requests[id]});
-        
+            }
+            updateSuggestTags(response.slice(0, 50));
+        }).fail(function () {
+            enableSuggestTags(false);
+            exitCopyMode();
+        }).then(() => { delete g_requests[id] });
 
     }, 500);
 
@@ -817,12 +826,32 @@ function suggestAutocompleteTag() { //$("#inputTags").val() - called each time a
 
 
     function updateSuggestTags(tags) {
-        let el = $("#tagSuggest");
+
+        const el = $("#tagSuggest");
         el.children().each(function (i, v) { v.remove(); });
+
+        //seperate unnamespaced tags from namespaced tags, leaving namespaces with unique tags last
+        let deprioritised = [];
+        let namespaced = [];
+        let unnamespaced = [];
+        tags.forEach((tag) => {
+            if (tag.value.includes(':')) {
+                if (!(
+                    tag.value.startsWith('filename:') ||
+                    tag.value.startsWith('title:')
+                )) {
+                    namespaced.push(tag);
+                } else {
+                    deprioritised.push(tag);
+                }
+            } else { unnamespaced.push(tag); }
+        });
+        tags = unnamespaced.concat(namespaced, deprioritised);
+
         tags.forEach(function (tag) {
-            let tagel = $(`<span class="${findnamespaceColor(tag.value)}">${tag.value}</span>`);
-            addSelectListener(tagel);
-            el.append($(tagel));
+        let tagel = $(`<span class="${findnamespaceColor(tag.value)}">${tag.value}</span>`);
+        addSelectListener(tagel);
+        el.append($(tagel));
         });
     }
 

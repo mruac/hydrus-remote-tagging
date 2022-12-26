@@ -211,12 +211,14 @@
         </div>
     </div>
 
-    <script src="/static/show-file.js"></script>
     <script type="text/javascript">
-        metadata = {{ meta | tojson }};
-        currentRepo = "{{ selectedService }}";
-        repos = {{ repos | tojson }}
+        const metadata = {{ meta | tojson }};
+        const currentRepoKey = {{ selectedServiceKey | tojson }};
+        const repos = {{ repos | tojson }};
+        const apiVersion = {{ api_version }};
     </script>
+    <script src="/static/show-file.js"></script>
+
 
 </body>
 

@@ -5,6 +5,8 @@ import os
 import secrets
 import sqlite3 as sql
 
+LEGACY_API_VERSION = 34
+
 app = Flask(__name__)
 app._static_folder = os.path.abspath("templates/static/")
 app.secret_key = os.getenv('HRT_SECRET_KEY') or "cookiesonfire"
@@ -12,7 +14,10 @@ app.secret_key = os.getenv('HRT_SECRET_KEY') or "cookiesonfire"
 def search_files(api_key, api_url, search_tags, fileSort, fileOrder):
     cl = hydrus.Client(api_key, api_url)
     fids = cl.search_files(tags=search_tags, file_service_name="my files",
-                           tag_service_name="all known tags", file_sort_asc=fileOrder, file_sort_type=fileSort) # FIXME: Fix the sort & order feature, it doesn't do this atm.
+                           tag_service_name="all known tags", 
+                           file_sort_asc=fileOrder,
+                           file_sort_type=fileSort
+                           ) # FIXME: Fix the sort & order feature, it doesn't do this atm.
     return fids
 
 
@@ -77,8 +82,7 @@ def ad():
         clean_tags = []
         for tag in tags:
             clean_tags.append(tag.replace('_', ' '))
-        fids = search_files(api_key, api_url, clean_tags, int(
-            request.form.getlist("fileSort")[0]), isAscending)
+        fids = search_files(api_key, api_url, clean_tags, int(request.form.getlist("fileSort")[0]), isAscending)
         total_ids = len(fids)
         save_sql(fids)
 
@@ -86,7 +90,11 @@ def ad():
         for tag in request.form.get('appendTags').split():
             session['appendTag'].append(tag.replace('_', ' ').lower())
 
-        return render_template('results.html', tagrepo=get_services(api_key, api_url), ids=total_ids, tags=post_tags)
+        return render_template('results.html', 
+        tagrepo=get_services(api_key, api_url), 
+        ids=total_ids, 
+        tags=post_tags
+        )
     except hydrus.InsufficientAccess:  # returns http://, not https://
         return render_template('index.html', error="Insufficient access to Hydrus API")
     except hydrus.ServerError:
@@ -122,12 +130,25 @@ def ads(id):
         metadata = json.loads(json.dumps(
             cl.get_file_metadata(file_ids=[iid])[0]))
         session['metadata'] = metadata
+        session['api_version'] = cl.get_api_version()["version"]
+        session['repos'] = get_services(api_key, api_url)
+    
         if request.method == 'POST':
             if request.form.get('tagrepo') != None:
-                session['selectedTagRepo'] = request.form.get('tagrepo')
+                session['selectedTagRepoKey'] = request.form.get('tagrepo')
         # prevent browser from loading cached page to force re-fetch tags when navigating back and forth
-        response = make_response(render_template('show-file.html', image=image, next_images=next_images, nid=nid, current_id=id, total_ids=total_ids,
-                                                 meta=metadata, selectedService=session['selectedTagRepo'], repos=get_services(api_key, api_url)))
+        response = make_response(render_template('show-file.html', 
+        image=image, 
+        next_images=next_images, 
+        nid=nid, 
+        current_id=id, 
+        total_ids=total_ids,
+        meta=metadata, 
+        selectedServiceKey=session['selectedTagRepoKey'],
+        repos=session['repos'],
+        api_version = session['api_version']
+        ))
+        
         # HTTP 1.1.
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
@@ -152,13 +173,16 @@ def updateTags():
     tagsToAdd = data['add']
     tagsToDel = data['del']
     hash = data['hash']
-    tag_repo = session['selectedTagRepo']
+    tag_repo_key = session['selectedTagRepoKey']
+    file_tags = session['metadata']['service_keys_to_statuses_to_tags'][tag_repo_key]
+    if session['api_version'] > LEGACY_API_VERSION:
+        file_tags = session['metadata']['tags'][tag_repo_key]["storage_tags"]
 
     if not session['appendTagIsSet']:
         try:
-            if not all(tag in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0'] for tag in session['appendTag']):
+            if not all(tag in file_tags['0'] for tag in session['appendTag']):
                 for tag in session['appendTag']:
-                    if tag not in session['metadata']['service_names_to_statuses_to_tags'][tag_repo]['0'] and tag not in tagsToAdd:
+                    if tag not in file_tags['0'] and tag not in tagsToAdd:
                         tagsToAdd.append(tag)
                         session['appendTagIsSet'] = True
         except KeyError:
@@ -166,9 +190,9 @@ def updateTags():
             for tag in session['appendTag']:
                 tagsToAdd.append(tag)
 
-    listOfTags = {tag_repo: {"0": tagsToAdd, "1": tagsToDel}}
+    listOfTags = {tag_repo_key: {"0": tagsToAdd, "1": tagsToDel}}
     cl = hydrus.Client(session['api_key'], session['api_url'])
-    cl.add_tags([hash], service_names_to_actions_to_tags=listOfTags)
+    cl.add_tags([hash], service_keys_to_actions_to_tags=listOfTags)
     # listOfTags.update({"matches": matchedTags})
     return jsonify(listOfTags)  # updated lsit of tags
 
