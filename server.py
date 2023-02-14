@@ -174,9 +174,10 @@ def updateTags():
     tagsToDel = data['del']
     hash = data['hash']
     tag_repo_key = session['selectedTagRepoKey']
-    file_tags = session['metadata']['service_keys_to_statuses_to_tags'][tag_repo_key]
     if session['api_version'] > LEGACY_API_VERSION:
         file_tags = session['metadata']['tags'][tag_repo_key]["storage_tags"]
+    else: 
+        file_tags = session['metadata']['service_keys_to_statuses_to_tags'][tag_repo_key]
 
     if not session['appendTagIsSet']:
         try:
