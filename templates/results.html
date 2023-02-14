@@ -4,16 +4,16 @@
 <head>
     <meta charset="utf-8">
     <title>Tag Search Results</title>
-    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
 
 </head>
 
 <body style="background: #19191b">
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-3">
-        <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Remote Tagging</a>
+        <a class="nav-link" href="{{ url_for('index') }}" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Remote Tagging</a>
     </nav>
     {% if ids %}
-    <form action="show-file/1" method="POST" class="mx-auto" style="display: flex; flex-direction: column;">
+    <form action="{{ url_for('ads', id=1) }}" method="POST" class="mx-auto" style="display: flex; flex-direction: column;">
         <h1 class="text-light mx-auto" style="align-self: center;"> Found {{ ids }} images for {{ tags }}</h1>
         <div class="d-flex justify-content-center my-2 text-white">
             <label for="idaaa" class="col-form-label mx-3">Select local tag repository to commit to:</label><select id="idaaa"

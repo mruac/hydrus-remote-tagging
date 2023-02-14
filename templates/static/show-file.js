@@ -1,4 +1,4 @@
-var current = location.href.split('/')[4].replace(/\?.*$/, ''),
+var current = location.href.split('/').at(-1).replace(/\?.*$/, ''),
     next = parseInt(current) + 1,
     prev = parseInt(current) - 1,
     MAXhandyTags = 50,
