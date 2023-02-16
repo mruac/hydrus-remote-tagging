@@ -25,13 +25,20 @@ docker build -t hydrus-remote-tagging .\Dockerfile
 
 Load the image into a container (Run the instance) and detach it from the CLI so that it runs in the background
 ```
-docker run -d -p ${PORT}:8243 -e HRT_SECRET_KEY=<yoursecretkey> hydrus-remote-tagging
+docker run -d -p ${PORT}:8243 -e HRT_SECRET_KEY=${SECRET} -e HRT_URL_PREFIX=${PREFIX} hydrus-remote-tagging
 ```
 
-Replace `${PORT}` with your desired available port (eg. port `80` or `8080`), and `<yoursecretkey>` with your secret key for Python's Flask.
-The instance should then be accessible at `http://localhost:${PORT}`
+Replace 
+  * `${PORT}` with your desired available port (eg. port `80` or `8080`)
+  * `${SECRET}` with your secret key
+  * `${PREFIX}` with the desired URL prefix (optional, lead with `/` when used or omit the `-e ...`)
+for Python's Flask.
+
+The instance should then be accessible at `http://localhost:${PORT}${PREFIX}` (eg. http://localhost:80/myapp)
 
 Omit the `-d` to make it run in the CLI.
+
+If you run Flask with URL prefix, be sure to NOT strip the prefix in your reverse proxy (if you use one). Flask expects to handle the full URL, read [this](https://dlukes.github.io/flask-wsgi-url-prefix.html) for further info.
 
 ## Pages:
 ### Main
