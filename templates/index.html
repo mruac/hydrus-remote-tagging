@@ -4,10 +4,10 @@
 <head>
     <meta charset="utf-8">
     <title>Hydrus Remote Tagging</title>
-    <link rel="stylesheet" href="/static/bootstrap.min.css">
-    <script src="/static/jquery-3.3.1.min.js"></script>
-    <script src="/static/bootstrap.min.js"></script>
-    <script src="/static/index.js" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='index.js') }}" defer></script>
 </head>
 
 <body style="background: #19191b">
@@ -19,7 +19,7 @@
     {% endif %}
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-3">
-        <a class="nav-link" href="/" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Remote Tagging</a>
+        <a class="nav-link" href="{{ url_for('index') }}" style="font-size: 1.5em; font-weight: 600; color: white;">Hydrus Remote Tagging</a>
         <button type="button" class="btn btn-primary ms-auto m-2" data-bs-toggle="modal"
             data-bs-target="#tagPresentationModal">Settings</button>
     </nav>

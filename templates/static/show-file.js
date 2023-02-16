@@ -1,4 +1,4 @@
-var current = location.href.split('/')[4].replace(/\?.*$/, ''),
+var current = location.href.split('/').at(-1).replace(/\?.*$/, ''),
     next = parseInt(current) + 1,
     prev = parseInt(current) - 1,
     MAXhandyTags = 50,
@@ -561,7 +561,7 @@ function sendTags(tags) {
     const id = (Math.random() * 100000000 | 0).toString();
     g_requests[id] = $.ajax({
         type: "POST",
-        url: "/updateTags",
+        url: updateUrl,
         data: JSON.stringify(data),
         dataType: "json",
         contentType: "application/json; charset=utf-8"
@@ -805,7 +805,7 @@ function suggestAutocompleteTag() { //$("#inputTags").val() - called each time a
         const id = (Math.random() * 100000000 | 0).toString();
         g_requests[id] = $.ajax({
             type: "GET",
-            url: "/searchTags",
+            url: searchUrl,
             data: { "tag": tag },
             dataType: "json",
             contentType: "application/json;charset=utf-8"
