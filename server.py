@@ -13,8 +13,8 @@ app.secret_key = os.getenv('HRT_SECRET_KEY') or "cookiesonfire"
 
 def search_files(api_key, api_url, search_tags, fileSort, fileOrder):
     cl = hydrus.Client(api_key, api_url)
-    fids = cl.search_files(tags=search_tags, file_service_name="my files",
-                           tag_service_name="all known tags", 
+    fids = cl.search_files(tags=search_tags, file_service_keys="my files",
+                           tag_service_key="all known tags", 
                            file_sort_asc=fileOrder,
                            file_sort_type=fileSort
                            ) # FIXME: Fix the sort & order feature, it doesn't do this atm.
