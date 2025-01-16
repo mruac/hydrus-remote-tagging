@@ -33,13 +33,22 @@ The instance should then be accessible at `http://localhost:${PORT}`
 
 Omit the `-d` to make it run in the CLI.
 
+# Changes
+20250115:
+
+* Tags now flex into the available space instead of taking up a new line each. Hopefully this will make viewing lots of tags easier instead of scrolling down frequently. Adjust sidebar width to fit more/squeeze out tags into the available space.
+* Added a "tag recall" button. Re-submits the last submitted set of tags. Useful for a sequence of images (eg. a set) that need the same tags. It is a yellow button with a partial clock icon.
+* Added a "fast tag input" button. Useful to enter tag(s) other than the "tag(s) to append for each file" option, but only on certain files. This can be set on the initial search page on `index.html`. It is a red button with a play icon in a circle.
+* Added notes into the expandable additional information field.
+
 ## Pages:
 ### Main
 * Inputs:
   * `API URL` - URL to the Hydrus client API
   * `API key` - Access key for the api
   * `search query` - search for files with tags here. Space seperated & replace spaces with underscore. System predicates supported.
-  * `tag(s) to append for each tagged file` - Additional tags to add to all tagged files
+  * `tag(s) to append for each tagged file` - Additional tags to add to all _tagged_ files.
+  * **`[NEW]`** - `Tags to use as fast input` - Similar the previous field, but available as a button (red button with play icon inside circle) to be used on individual files. This button will enter the tag(s) entered here, and jump to the next file.
   * `Sort` - Sort found files in selected type.
   * `Order` - Order found files in ascending or descending order.
   * `Search` button to submit.
@@ -53,14 +62,15 @@ Shows the number of files found for a search result for files in `my files` file
 * File preview fills page.
 * Left Sidebar (Recent / Frequent tags)
   * Toggled by pressing `⭐` button.
-  * button toggle between recently added tags and most frequently added tags
+  * Grey filled clock button toggles between _recently added tags_ and _most frequently added tags_ for the session.
+  * **`[NEW]`**  Yellow partial clock button resubmits the last submitted tag(s).
+  * **`[NEW]`**  Red play icon within circle button submits the "fast input" tag(s) and goes to the next file.
   * Resizable, maintains same size and display state across pages.
 
 * Right Sidebar (File metadata):
   * Toggled by pressing metadata sidebar key (default `CTRL`) or `🛈` button.
   * Resizable, maintains same size and display state across pages.
-  * Buttons to toggle the file metadata (known URLs & hash) and the sidebar.
-  * Clicking on the headers except for `All Known Tags` will toggle the visibility of their contents.
+  * Buttons to toggle the file metadata (hash, notes & known URLs) and the sidebar.
   * List of tags for `All Known Tags`, where color is applied to each tag as per the rules set in tag presentation rules. Tags that are **bolded** and *italicised* indicates that the tag can be removed as they are committed to the selected local tag repository.
 * Tag input field at the bottom, and a green `→` or blue `📋` button on right.
   * Submit mode (green `→`)

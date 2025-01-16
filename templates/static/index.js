@@ -107,3 +107,10 @@ $('#resetEntry').click(function () {
     });
     $("#inputTextarea").val(res);
 });
+
+    $('#fastInputTags').on('input keyup change',()=>{
+        a = $('#fastInputTags').val();
+        a = a.split(' ').map((v)=>{return v.replaceAll('_',' ')}).join(', ');
+        console.log(a);
+        sessionStorage.setItem('fastInputTags', a);
+    });

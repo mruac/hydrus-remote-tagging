@@ -19,17 +19,20 @@ var current = location.href.split('/')[4].replace(/\?.*$/, ''),
     g_caretLocation = 0,
     g_currentInputTag = "";
 
-const currentRepo = repos["local_tags"].find((v) => { return v["service_key"] === currentRepoKey });
+const currentRepo = repos[currentRepoKey];
+const allKnownTagsRepoKey = Object.keys(repos).find((v) => {
+    if (repos[v].name === 'all known tags' &&
+        repos[v].type === 10
+    ) { return true; }
+    return false;
+}) ?? currentRepoKey;
 const g_crTags = (() => {
 
-    let res = metadata?.["service_names_to_statuses_to_tags"]?.[currentRepo["name"]]; //old file metadata tags structure
-    if (apiVersion > 34) {
-        res = metadata?.["tags"]?.[currentRepo["service_key"]]["storage_tags"]; //new file metadata tags structure
-    }
+    res = metadata?.["tags"]?.[currentRepoKey]["storage_tags"]; //new file metadata tags structure
 
     if (res === undefined) {
-        nbnb
-        res = { "0": [], "2": [] }
+        nbnb;
+        res = { "0": [], "2": [] };
     }
 
     if (res["0"] === undefined) {
@@ -43,13 +46,10 @@ const g_crTags = (() => {
 })();
 
 const g_akTags = (() => { //metadata['service_names_to_statuses_to_tags']["all known tags"]
-    let res = metadata?.['service_names_to_statuses_to_tags']?.["all known tags"]; //old file metadata tags structure
-    if (apiVersion > 34) {
-        res = metadata?.["tags"]?.[repos['all_known_tags'][0]['service_key']]["storage_tags"]; //new file metadata tags structure
-    }
+    res = metadata["tags"]?.[allKnownTagsRepoKey]?.['storage_tags']; //new file metadata tags structure
 
     if (res === undefined) {
-        res = { "0": [], "2": [] }
+        res = { "0": [], "2": [] };
     }
 
     if (res['0'] == undefined) {
@@ -100,6 +100,8 @@ function initialise() {
     } else {//history
         loadRecentTags();
     }
+
+    const file_metadataButton = new bootstrap.Collapse('#file_metadata', { toggle: false });
 
     //hook into Bootstrap 5's offCanvas sidebars
     offcanvas_metadata_el = document.getElementById("metadataSidebar");
@@ -229,7 +231,7 @@ function initialise() {
                         i += 1;
                     }
                     if (i < 0) { i = els.length + i; }
-                    else if (i > els.length - 1) { i = i - els.length }
+                    else if (i > els.length - 1) { i = i - els.length; }
                     selectTag(els[i]);
                     ensureInView($("#tagSuggest")[0], els[i]);
                 } else if ($("#tagSuggest").is(":visible")) {
@@ -281,7 +283,7 @@ function initialise() {
             suggestTagMode = false;
             suggestAutocompleteTag();
         }
-    })
+    });
 
     $(".metadataSidebarToggle").on("click", function () {
         offcanvas_metadata.toggle();
@@ -298,12 +300,53 @@ function initialise() {
         }
     });
 
+    $('#recallInput').on('click', function () {
+        let tags = sessionStorage.getItem('lastCommand');
+        if (tags !== null) {
+            $("#inputTags").val(tags);
+            onSubmitTags();
+        }
+    });
+
+    $('#recallFastInputTags').on('click', function () {
+        let tags = sessionStorage.getItem('fastInputTags');
+        if (tags !== '' || tags !== undefined) {
+            tags = cleanTagInput(tags);
+
+            //exclude tags already in all known tags - to make this add-only
+            tags = tags.filter((v)=>{
+                if (metadata["tags"][allKnownTagsRepoKey]['storage_tags']["0"].indexOf(v) === -1) {return true}
+                return false;
+            });
+            if(tags.length > 0) {
+
+            tags = tags.map((v)=>{
+                return v.replaceAll("\\", "\\\\").replaceAll(",", "\\,");
+            });
+            tags = tags.join(', ');
+
+                $("#inputTags").val(tags);
+                sendTags(tags);
+            }
+            toNextFile();
+
+        }
+
+        });
+
+    $('#file_metadataButton').on('click', function () {
+        file_metadataButton.toggle();
+    });
+
+
+
+
     //#handyToggle button - switch between Recent and Most Used tags
     $("#handyToggle").on("click", function () {
         if (sessionStorage.getItem("frequentORhistory") == "false") { //frequent
             let starSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16">
         <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-        </svg>`
+        </svg>`;
             $("#handyToggle svg").remove();
             $("#handySidebarButton svg").remove();
             $("#handyToggle").append(starSVG);
@@ -315,7 +358,7 @@ function initialise() {
         } else {//history
             let clockSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-fill" viewBox="0 0 16 16">
         <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-      </svg>`
+      </svg>`;
             $("#handyToggle svg").remove();
             $("#handySidebarButton svg").remove();
             $("#handyToggle").append(clockSVG);
@@ -352,7 +395,7 @@ function loadFrequentTags() {
 
 function loadRecentTags() {
     $("#handySidebarTitle").text("Recent Tags");
-    loadTags("#handylistOfTags", historyTags)
+    loadTags("#handylistOfTags", historyTags);
 }
 
 function toNextFile() {
@@ -395,16 +438,16 @@ function removeTag(tag) {
 function findTagEl(tagListSelector, tag) {
     let tags = $(`${tagListSelector}`).children();
     for (let i = 0; i < tags.length; i++) {
-        if ($(tags[i]).text() == tag) { return tags[i] }
+        if ($(tags[i]).text() == tag) { return tags[i]; }
     }
 }
 
 function loadResizable_MetadataSidebar() {
     var metadataWidthMin = $(window).width() * .20;
-    var metadataWidthMax = $(window).width() * .80;
+    var metadataWidthMax = $(window).width() * .90;
     $(window).on("resize", function () {
         metadataWidthMin = $(window).width() * .20;
-        metadataWidthMax = $(window).width() * .80;
+        metadataWidthMax = $(window).width() * .90;
         var metadatasidebarWidth = parseInt($('#metadataSidebar').css("width"));
         if (metadatasidebarWidth < metadataWidthMin) {
             $('#metadataSidebar').css("width", metadataWidthMin + 'px');
@@ -427,7 +470,7 @@ function loadResizable_MetadataSidebar() {
     $(document).on("mousemove touchmove", function (e) {
         if (!isResizingmetadataSidebar) { return; }
         var currentXpos = e.clientX == undefined ? e.changedTouches[0]["clientX"] : e.clientX;
-        if (currentXpos < metadataWidthMax && currentXpos > metadataWidthMin) {
+        if (currentXpos > ($(window).width() - metadataWidthMax) && currentXpos < ($(window).width() - metadataWidthMin)) {
             $('#metadataSidebar').css("width", `${$(window).width() - currentXpos}px`);
         }
     });
@@ -447,10 +490,10 @@ function loadResizable_MetadataSidebar() {
 
 function loadResizable_HandySidebar() {
     var handyWidthMin = $(window).width() * .20;
-    var handyWidthMax = $(window).width() * .70;
+    var handyWidthMax = $(window).width() * .90;
     $(window).on("resize", function () {
         handyWidthMin = $(window).width() * .20;
-        handyWidthMax = $(window).width() * .70;
+        handyWidthMax = $(window).width() * .90;
         var handysidebarWidth = parseInt($('#handySidebar').css("width"));
         if (handysidebarWidth < handyWidthMin) {
             $('#handySidebar').css("width", handyWidthMin + 'px');
@@ -491,6 +534,17 @@ function loadResizable_HandySidebar() {
     });
 }
 
+function cleanTagInput(input_str) {
+    tags = input_str.match(/(\\.|[^,])+/g);
+    for (let i = 0; i < tags.length; i++) { //clean each tag
+        tags[i] = tags[i].replaceAll("\\,", ",").replaceAll("\\\\", "\\"); //convert escaped chars to original chars
+        tags[i] = tags[i].trim(); //trim whitespace around tag
+        tags[i] = tags[i].toLowerCase();
+    }
+    tags = tags.filter((v, i) => tags.indexOf(v) === i); //remove duplicates
+    return tags;
+}
+
 function sendTags(tags) {
     $("#inputTags").prop('disabled', true);
     $("#submitTags").prop('disabled', true);
@@ -506,33 +560,19 @@ function sendTags(tags) {
         "add": [],
         "del": [],
         hash: metadata["hash"],
-    }
-    tags = tags.match(/(\\.|[^,])+/g);
-    for (let i = 0; i < tags.length; i++) { //clean each tag
-        tags[i] = tags[i].replaceAll("\\,", ",").replaceAll("\\\\", "\\"); //convert escaped chars to original chars
-        tags[i] = tags[i].trim(); //trim whitespace around tag
-        tags[i] = tags[i].toLowerCase();
-    }
-    tags = tags.filter((v, i) => tags.indexOf(v) === i); //remove duplicates
+    };
+
+    tags = cleanTagInput(tags);
+
     tags.forEach(function (tag) { //sort tags into add & del
         if (tag == "") { return; }
         if (CRcurrentTags.indexOf(tag) > -1) {
             //check if tags exists in other repos before removing from All Known tags
-            const res = (() => {
-                if (apiVersion > 34) {
-                    return repos['local_tags'].some(function (v) {
-                        if (metadata["tags"]?.[v.service_key]?.['storage_tags']["0"] != undefined) {
-                            if (metadata["tags"][v.service_key]['storage_tags']["0"].indexOf(tag) > -1) { return true; }
-                        }
-                    });
-                } else {
-                    return repos['local_tags'].some(function (v) {
-                        if (metadata["service_names_to_statuses_to_tags"]?.[v.name]?.["0"] != undefined) {
-                            if (metadata["service_names_to_statuses_to_tags"][v.name]["0"].indexOf(tag) > -1) { return true; }
-                        }
-                    });
+            const res = Object.keys(metadata['tags']).some(function (v) {
+                if (metadata["tags"]?.[v]?.['storage_tags']["0"] != undefined) {
+                    if (metadata["tags"][v]['storage_tags']["0"].indexOf(tag) > -1) { return true; }
                 }
-            })();
+            });
 
             if (res) {
                 AKdeletedTags.push(tag);
@@ -555,7 +595,7 @@ function sendTags(tags) {
         }
     });
 
-    console.log(data);
+    console.debug(data);
     recordTags(data["add"]);
 
     const id = (Math.random() * 100000000 | 0).toString();
@@ -570,18 +610,13 @@ function sendTags(tags) {
         $("#inputTags").focus();
         $("#submitTags").prop('disabled', false);
         submitToggle = true;
-        console.log(response);
+        console.debug(response);
         let addTags = {};
         let delTags = {};
-        if (apiVersion > 34) {
-            addTags = response[currentRepo["service_key"]]["0"];
-            delTags = response[currentRepo["service_key"]]["1"];
-        } else {
-            addTags = response[currentRepo["name"]]["0"];
-            delTags = response[currentRepo["name"]]["1"];
-        }
-        addTags.forEach(tag => { insertTag(tag) });
-        delTags.forEach(tag => { removeTag(tag) });
+        addTags = response[currentRepoKey]["0"];
+        delTags = response[currentRepoKey]["1"];
+        addTags.forEach(tag => { insertTag(tag); });
+        delTags.forEach(tag => { removeTag(tag); });
     }).fail(function () {
         $("#inputTags").addClass("bg-danger");
         $("#submitTags").addClass("bg-danger");
@@ -590,7 +625,7 @@ function sendTags(tags) {
             $("#inputTags").prop('disabled', false).removeClass("bg-danger");
             $("#submitTags").prop('disabled', false).removeClass("bg-danger");
         }, 1000);
-    }).then(() => { delete g_requests[id] });
+    }).then(() => { delete g_requests[id]; });
 
 };
 
@@ -616,20 +651,20 @@ function findnamespaceColor(tag) { //matches namespaceColors to a tag
     let arr = JSON.parse(localStorage.tagPresentation)["namespaceColors"];
     for (let i = 0; i < arr.length; i++) {
         let re = new RegExp(`${arr[i][1]}`, 'gm');
-        if (re.test(tag)) { return arr[i][0] }
+        if (re.test(tag)) { return arr[i][0]; }
     }
     return "";
 }
 
 function checkModifiable(tag) {
-    if (g_crTags['0'].indexOf(tag) > -1) { return "modifiable" }
-    return ""
+    if (g_crTags['0'].indexOf(tag) > -1) { return "modifiable"; }
+    return "";
 }
 
 function loadTags(element, tags) {
     $(`${element} span`).remove(); //remove all existing tags
     tags.forEach(tag => {
-        let tagel = $(`<span class="${findnamespaceColor(tag)} ${checkModifiable(tag)}">${tag}<br/></span>`);
+        const tagel = $(`<span class="${findnamespaceColor(tag)} ${checkModifiable(tag)}">${tag}</span>`);
         addSelectListener(tagel);
         $(element).append(tagel);
     });
@@ -660,7 +695,7 @@ function recordTags(tags) { //each time tags are added, process them here
 
 function addSelectListener(el) {
     $(el).on("click", function (e) {
-        if ($(e.target).css("background-color") == 'rgba(0, 0, 0, 0)') {
+        if ($(e.target).css("background-color") == 'rgb(0, 0, 0)') {
             selectTag(e.currentTarget);
         } else {
             deselectTag(e.currentTarget);
@@ -685,7 +720,7 @@ function deselectTag(tagEl) {
         tagsSelected.splice(foundIndex, 1);
         $(tagEl).css("background-color", "");
         $(tagEl).css("color", "");
-        switchToCopyTagMode()
+        switchToCopyTagMode();
     }
 }
 
@@ -696,16 +731,16 @@ function deselectTags(element) {
     });
 }
 
-function pickTextColorBasedOnBgColor(rgbString){ //https://stackoverflow.com/a/11868398/5791312
+function pickTextColorBasedOnBgColor(rgbString) { //https://stackoverflow.com/a/11868398/5791312
     const colorArr = rgbString.slice(
-        rgbString.indexOf("(") + 1, 
+        rgbString.indexOf("(") + 1,
         rgbString.indexOf(")")
     ).split(", ");
 
     let r = parseInt(colorArr[0]);
     let g = parseInt(colorArr[1]);
     let b = parseInt(colorArr[2]);
-    let yiq = ((r*299)+(g*587)+(b*114))/1000;
+    let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
     return (yiq >= 128) ? '#000000' : '#FFFFFF';
 }
 
@@ -724,7 +759,6 @@ function exitCopyMode() {
     deselectTags("#handylistOfTags");
     deselectTags("#listOfTags");
     deselectTags("#tagSuggest");
-    // enableSuggestTags(false);
     tagsSelected = [];
     $("#submitTags").removeClass("btn-primary").addClass("btn-success").html(`→`);
 }
@@ -732,7 +766,6 @@ function exitCopyMode() {
 function onSubmitTags() {
     let tags = $("#inputTags").val();
     if (tagsSelected.length === 1 && $(tagsSelected[0]).parent()[0] === $("#tagSuggest")[0]) {
-        console.log("suggestTagMode: " + suggestTagMode);
         //Submit selected suggested tag
         let tag = $(tagsSelected[0]).text().replaceAll("\\", "\\\\").replaceAll(",", "\\,");
 
@@ -743,7 +776,6 @@ function onSubmitTags() {
         let inputTags = $("#inputTags").val();
         let nearestBeforeCommaLeft = findBeforeCommaIndex(inputTags, caretLocation, false);
         let nearestBeforeCommaRight = findBeforeCommaIndex(inputTags, caretLocation, true);
-        console.log({ "inputField": inputTags, "selectedTag": tag, "caretLocation": caretLocation, "left": nearestBeforeCommaLeft, "right": nearestBeforeCommaRight, "caret": inputTags.slice(0, caretLocation) + "^" + inputTags.slice(caretLocation, inputTags.length) });
         $("#inputTags").val(`${inputTags.slice(0, nearestBeforeCommaLeft)} ${tag}, ${inputTags.slice(nearestBeforeCommaRight, inputTags.length - 1)}`);
         $("#inputTags").get(0).selectionStart = nearestBeforeCommaLeft + tag.length + 2;
         $("#inputTags").get(0).selectionEnd = nearestBeforeCommaLeft + tag.length + 2;
@@ -764,6 +796,7 @@ function onSubmitTags() {
         enableSuggestTags(false);
         exitCopyMode();
         sendTags(tags);
+        sessionStorage.setItem('lastCommand', tags);
     }
 
 }
@@ -773,7 +806,7 @@ function suggestAutocompleteTag() { //$("#inputTags").val() - called each time a
     //list of Suggest tags is hidden when focus is lost from #inputTags. User has to start typing again (not delete/backspace) to initiate tagSuggestion again.
 
     // see fixme where it requests to change from using arrays to dictionary objects & implements a self-destroying / cancelling method using a unique id.
-    //2000ms wait before sending ajax, cancel wait if user types again. prevents sending ajax on every keystroke while user is actively typing
+    //wait before sending ajax, cancel wait if user types again. prevents sending ajax on every keystroke while user is actively typing
     //cancel ajax Promise if user types again before it is resolved.
     const id = (Math.random() * 100000000 | 0).toString();
 
@@ -793,7 +826,6 @@ function suggestAutocompleteTag() { //$("#inputTags").val() - called each time a
         let nearestBeforeCommaLeft = findBeforeCommaIndex(inputTags, caretLocation, false);
         let nearestBeforeCommaRight = findBeforeCommaIndex(inputTags, caretLocation, true);
         let tag = inputTags.slice(nearestBeforeCommaLeft, nearestBeforeCommaRight).trim().toLowerCase();
-        console.log({ "tag": tag, "caretLocation": caretLocation, "commaLeft": nearestBeforeCommaLeft, "commaRight": nearestBeforeCommaRight });
 
         if (
             tag.length < 3 || //don't search for tags less than 4 chars
@@ -817,7 +849,7 @@ function suggestAutocompleteTag() { //$("#inputTags").val() - called each time a
         }).fail(function () {
             enableSuggestTags(false);
             exitCopyMode();
-        }).then(() => { delete g_requests[id] });
+        }).then(() => { delete g_requests[id]; });
 
     }, 500);
 
@@ -849,9 +881,9 @@ function suggestAutocompleteTag() { //$("#inputTags").val() - called each time a
         tags = unnamespaced.concat(namespaced, deprioritised);
 
         tags.forEach(function (tag) {
-        let tagel = $(`<span class="${findnamespaceColor(tag.value)}">${tag.value}</span>`);
-        addSelectListener(tagel);
-        el.append($(tagel));
+            let tagel = $(`<span class="${findnamespaceColor(tag.value)}">${tag.value}</span>`);
+            addSelectListener(tagel);
+            el.append($(tagel));
         });
     }
 

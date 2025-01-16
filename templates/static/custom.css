@@ -2,3 +2,16 @@
     padding-bottom: 0px !important;
     padding-top: 0px !important;
 }
+
+#handylistOfTags * , #listOfTags *, #tagSuggest * {
+    /* margin: 0 0.5vw 0 0.5vw; */
+    background-color: black;
+    padding: 0 0.5vw 0 0.5vw;
+    border-radius: 5px;
+}
+
+#handylistOfTags, #listOfTags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}

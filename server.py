@@ -13,8 +13,8 @@ app.secret_key = os.getenv('HRT_SECRET_KEY') or "cookiesonfire"
 
 def search_files(api_key, api_url, search_tags, fileSort, fileOrder):
     cl = hydrus.Client(api_key, api_url)
-    fids = cl.search_files(tags=search_tags, file_service_name="my files",
-                           tag_service_name="all known tags", 
+    fids = cl.search_files(tags=search_tags, file_service_keys=["6c6f63616c2066696c6573"], # my files
+                           tag_service_key="616c6c206b6e6f776e2074616773", # all known tags virtual tag service
                            file_sort_asc=fileOrder,
                            file_sort_type=fileSort
                            ) # FIXME: Fix the sort & order feature, it doesn't do this atm.
@@ -83,8 +83,8 @@ def ad():
         for tag in tags:
             clean_tags.append(tag.replace('_', ' '))
         fids = search_files(api_key, api_url, clean_tags, int(request.form.getlist("fileSort")[0]), isAscending)
-        total_ids = len(fids)
-        save_sql(fids)
+        total_ids = len(fids['file_ids'])
+        save_sql(fids['file_ids'])
 
         session['appendTag'] = []
         for tag in request.form.get('appendTags').split():
@@ -127,11 +127,10 @@ def ads(id):
             next_images.append(api_url+"/get_files/file?file_id=" +
                                str(int(fids[intid+i]))+"&Hydrus-Client-API-Access-Key="+api_key)
             i += 1
-        metadata = json.loads(json.dumps(
-            cl.get_file_metadata(file_ids=[iid])[0]))
-        session['metadata'] = metadata
-        session['api_version'] = cl.get_api_version()["version"]
-        session['repos'] = get_services(api_key, api_url)
+        metadata = json.loads(json.dumps(cl.get_file_metadata(file_ids=[iid],include_notes=True)))
+        session['metadata'] = metadata['metadata'][0]
+        session['api_version'] = metadata["version"]
+        session['repos'] = metadata['services']
     
         if request.method == 'POST':
             if request.form.get('tagrepo') != None:
@@ -143,7 +142,7 @@ def ads(id):
         nid=nid, 
         current_id=id, 
         total_ids=total_ids,
-        meta=metadata, 
+        meta=metadata['metadata'][0], 
         selectedServiceKey=session['selectedTagRepoKey'],
         repos=session['repos'],
         api_version = session['api_version']

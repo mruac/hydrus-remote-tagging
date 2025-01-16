@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/static/bootstrap.min.css">
     <script src="/static/jquery-3.3.1.min.js"></script>
     <script src="/static/bootstrap.min.js"></script>
-    <script src="/static/index.js" defer></script>
 </head>
 
 <body style="background: #19191b">
@@ -31,8 +30,10 @@
             value="{{ session['api_key'] }}" name="api_key" placeholder="API Key" required>
         <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="tags"
             placeholder="Search Tags (underscores for spaces, spaces as seperator)">
-        <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="appendTags"
+            <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" name="appendTags"
             placeholder="Tag(s) to append for each tagged file">
+            <input class="form-control mr-sm-2" style="width: 50%; margin: 10px" type="text" id="fastInputTags"
+            placeholder="Tag(s) to use as fast input">
         <div class="input-group mb-3" style="width: 50%; margin: 10px">
             <label class="input-group-text" for="fileSort">Sort</label>
             <select class="form-select" id="fileSort" name="fileSort">
@@ -151,6 +152,7 @@
             </div>
         </div>
     </div>
+    <script src="/static/index.js" ></script>
 
 </body>
 
