@@ -836,9 +836,9 @@ function suggestAutocompleteTag() { //$("#inputTags").val() - called each time a
 
         const id = (Math.random() * 100000000 | 0).toString();
         g_requests[id] = $.ajax({
-            type: "GET",
+            type: "POST",
             url: "/searchTags",
-            data: { "tag": tag },
+            data: JSON.stringify({ "tag": tag }),
             dataType: "json",
             contentType: "application/json;charset=utf-8"
         }).done(function (response) {

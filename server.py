@@ -66,16 +66,22 @@ def ad():
         except KeyError:
             generate_session_id()
 
-        if request.form.getlist("fileOrder") == "true":
+        if request.form["fileOrder"] == "true":
             isAscending = True
         else:
             isAscending = False
+            
+        if request.form["useThumbnail"] == "true":
+            useThumbnail = True
+        else:
+            useThumbnail = False
 
         # start POST processing
         save_session(request.form.get('api_key'), request.form.get(
             'api_url'), request.form.get('tags'))
         api_key = session['api_key']
         api_url = session['api_url']
+        session['useThumbnail'] = useThumbnail
         session_id = session['session_id']
         post_tags = request.form.get('tags')
         tags = post_tags.split()
@@ -108,6 +114,7 @@ def ads(id):
     try:
         session['appendTagIsSet'] = False
         api_key = session['api_key']
+        useThumbnail = session['useThumbnail']
         if session['api_url'].endswith('/'):
             api_url = session['api_url'][:-1]
         else:
@@ -119,8 +126,12 @@ def ads(id):
         iid = int(fids[intid])
         nid = str(int(id) + 1)
         total_ids = len(fids)
-        image = api_url+"/get_files/file?file_id=" + \
-            str(int(fids[intid]))+"&Hydrus-Client-API-Access-Key="+api_key
+        if useThumbnail:
+            image = api_url+"/get_files/thumbnail?file_id=" + \
+                str(int(fids[intid]))+"&Hydrus-Client-API-Access-Key="+api_key
+        else:
+            image = api_url+"/get_files/file?file_id=" + \
+                str(int(fids[intid]))+"&Hydrus-Client-API-Access-Key="+api_key
         next_images = []
         i = 1
         while i < 4 and intid+i < total_ids:
@@ -196,11 +207,12 @@ def updateTags():
     # listOfTags.update({"matches": matchedTags})
     return jsonify(listOfTags)  # updated lsit of tags
 
-@app.route('/searchTags', methods=['GET'])
+@app.route('/searchTags', methods=['POST'])
 def searchTags():
+    data = request.json
     cl = hydrus.Client(session['api_key'], session['api_url'])
-    response = cl._api_request("GET", "/add_tags/search_tags", params={"search": request.args.get('tag'), "tag_display_type": "display"}) #NOTE: create a PR to add the tag_display_type to the cl.search_tags() function
-    return response.json()["tags"];
+    response = cl._api_request("GET", "/add_tags/search_tags", params={"search": data['tag'], "tag_display_type": "display"}) #NOTE: create a PR to add the tag_display_type to the cl.search_tags() function
+    return response.json()["tags"]
 
 @app.route('/', methods=['GET'])
 def index():
