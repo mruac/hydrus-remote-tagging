@@ -17,7 +17,7 @@ def search_files(api_key, api_url, search_tags, fileSort, fileOrder):
                            tag_service_key="616c6c206b6e6f776e2074616773", # all known tags virtual tag service
                            file_sort_asc=fileOrder,
                            file_sort_type=fileSort
-                           ) # FIXME: Fix the sort & order feature, it doesn't do this atm.
+                           )
     return fids
 
 
